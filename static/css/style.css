@@ -1,5 +1,5 @@
 body {
-  max-width: 30em;
+  max-width: 40em;
   font-size: 13pt;
   margin: 0 auto;
   font-family: sans-serif;
@@ -128,6 +128,7 @@ pre {
   background-color: #dfb;
   border-radius: 5px;
   box-shadow: 1px 1px 5px #ccc;
+  overflow: auto;
 }
 
 code {
