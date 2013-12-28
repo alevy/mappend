@@ -1,8 +1,10 @@
+@import url(https://fonts.googleapis.com/css?family=Merriweather|Cantarell);
+
 body {
   max-width: 40em;
   font-size: 13pt;
   margin: 0 auto;
-  font-family: sans-serif;
+  font-family: "Merriweather", serif;
 }
 
 body > header {
@@ -28,12 +30,12 @@ h2 a {
   color: #333;
 }
 
-article {
-  padding-top: 15px;
+h1, h2, h3, h4 {
+  font-family: Cantarell, sans-serif;
 }
 
-article .content {
-  font-family: "Libre Baskerville", serif;
+article {
+  padding-top: 15px;
 }
 
 article .content p {
