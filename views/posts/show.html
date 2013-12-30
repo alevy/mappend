@@ -1,7 +1,7 @@
 <article class="post">
   <header>
     <h2><a href="/posts/$post.postSlug$">$post.postTitle$</a></h2>
-    <time>$formatTime(post.postPostedAt)$</time>
+    <time datetime="$post.postPostedAt$">$formatTime(post.postPostedAt)$</time>
   </header>
   <div class="content">
     $markdown(post.postBody)$
@@ -40,12 +40,12 @@
   <form action="/posts/$post.postId$/comments" method="POST">
     <p$if(errors.name)$ class="error"$endif$>
       <label for="name">Name<sup>*</sup></label>
-      <input type="text" name="name"
+      <input type="text" name="name" id="name"
         placeholder="Jane Smith" value="$comment.commentName$"/>
     </p>
     <p$if(errors.email)$ class="error"$endif$>
       <label for="email">Email<sup>*</sup></label>
-      <input type="email" name="email"
+      <input type="email" name="email" id="email"
         placeholder="jane@thesmiths.net" value="$comment.commentEmail$"/>
     </p>
     <p$if(errors.comment)$ class="error"$endif$>
