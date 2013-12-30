@@ -2,8 +2,9 @@
 module Blog.Helpers where
 
 import Data.Aeson
+import Data.List
 import Data.Maybe
-import Data.Text (Text, unpack)
+import Data.Text (Text, unpack, replace)
 import Data.Time.LocalTime
 import Data.Time.Format
 import Network.Gravatar
@@ -15,7 +16,9 @@ helperFunctions :: FunctionMap
 helperFunctions = fromList
   [ ("formatTime", toFunction timeFormatter)
   , ("gravatar", toFunction gravatarUrl)
-  , ("markdown", toFunction markdown)]
+  , ("markdown", toFunction markdown)
+  , ("xmlEscape", toFunction xmlEscape)
+  , ("zonedToUTC", toFunction zonedToUTC)]
 
 gravatarUrl :: Text -> Maybe Int -> Value
 gravatarUrl email size = toJSON $
@@ -29,3 +32,14 @@ timeFormatter t mfmt =
 markdown :: Text -> Value
 markdown = toJSON . (writeHtmlString def) . (readMarkdown def)
                . (filter (/= '\r')) . unpack
+
+xmlEscape :: Text -> Value
+xmlEscape raw = toJSON $ foldl' escapr (replace "&" "&amp;" raw) escapeMap
+  where escapeMap = [ (">", "&gt;")
+                    , ("<", "&lt;")
+                    , ("'", "&apos;")
+                    , ("\"", "&quot;")]
+        escapr txt (orig, to) = replace orig to txt
+
+zonedToUTC :: ZonedTime -> Value
+zonedToUTC = toJSON . zonedTimeToUTC

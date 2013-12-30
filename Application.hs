@@ -28,6 +28,7 @@ app runner = do
       routeName "posts" $ do
         routePattern ":post_id/comments" $ commentsController
         routeREST $ postsController
+      routeName "feed" atomFeed
       routeTop $ restIndex $ postsController
       serveStatic "static"
 

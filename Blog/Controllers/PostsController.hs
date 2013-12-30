@@ -25,6 +25,16 @@ import Blog.Common
 import Blog.Models
 import Blog.Models.Post
 
+atomFeed :: Controller AppSettings ()
+atomFeed = withConnection $ \conn -> do
+  now <- liftIO getZonedTime
+  posts <- liftIO $ dbSelect conn $ addWhere_ "published"
+                                  $ setLimit 10
+                                  $ setOrderBy "posted_at desc"
+                                  $ modelDBSelect
+  renderPlain "atom.xml" $
+    object ["posts" .= (posts :: [Post]), "now" .= now]
+
 postsController :: REST AppSettings
 postsController = rest $ do
 
