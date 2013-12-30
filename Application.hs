@@ -18,9 +18,9 @@ app runner = do
     controllerApp settings $ withSession $ do
       openIdController handleLogin
       routeName "login" loginPage
-      routePattern "logout" logout
+      routeName "logout" logout
 
-      routePattern "admin" $ do
+      routeName "admin" $ do
         routeName "posts" $ do
           routePattern ":post_id/comments" $ commentsAdminController
           postsAdminController
