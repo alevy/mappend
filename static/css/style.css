@@ -1,10 +1,29 @@
 @import url(https://fonts.googleapis.com/css?family=Merriweather|Cantarell);
 
 body {
-  max-width: 40em;
   font-size: 13pt;
-  margin: 0 auto;
   font-family: "Merriweather", serif;
+  background-color: #f7f7f7;
+  width: 100%;
+  margin: 0;
+}
+
+@media (min-width: 90em) {
+
+  body {
+    max-width: 50em;
+    margin-left: 30em;
+  }
+
+}
+
+
+body > header, body > section {
+  background: #fff;
+  margin: 0px;
+  padding-top: 5px;
+  padding-left: 25px;
+  padding-right: 25px;
 }
 
 body > header {
@@ -92,12 +111,6 @@ ol#comments > li {
   margin-bottom: 10px;
 }
 
-.login_form input[name="openid_identifier"] {
-  width: 85%;
-  background: url(http://wiki.openid.net/f/openid-16x16.gif) no-repeat scroll left center;
-  padding-left: 16px;
-}
-
 p.error {
   border: 2px solid red;
   padding: 3px;
@@ -136,7 +149,7 @@ hr {
 
 pre {
   padding: 15px;
-  background-color: #dfb;
+  background-color: #fdf6e3;
   border-radius: 5px;
   box-shadow: 1px 1px 5px #ccc;
   overflow: auto;
@@ -145,6 +158,18 @@ pre {
 code {
   font-family: Ubuntu Mono, monospace;
 }
+
+.sourceCode .kw { color: #268BD2; }
+.sourceCode .dt { color: #268BD2; }
+.sourceCode .dv, .sourceCode .bn, .sourceCode .fl { color: #D33682; }
+.sourceCode .ch { color: #DC322F; }
+.sourceCode .st { color: #2AA198; }
+.sourceCode .co { color: #93A1A1; }
+.sourceCode .ot { color: #A57800; }
+.sourceCode .al { color: #CB4B16; font-weight: bold; }
+.sourceCode .fu { color: #268BD2; }
+.sourceCode .re { }
+.sourceCode .er { color: #D30102; font-weight: bold; }
 
 ol#comments {
   padding: 0px;
