@@ -8,7 +8,7 @@ import Data.Text (Text, unpack, replace)
 import Data.Time.LocalTime
 import Data.Time.Format
 import Network.Gravatar
-import Text.Pandoc (writeHtmlString, readMarkdown)
+import Text.Pandoc (writeHtmlString, readMarkdown, writerHighlight)
 import System.Locale
 import Web.Simple.Templates
 
@@ -30,7 +30,7 @@ timeFormatter t mfmt =
   in toJSON $ formatTime defaultTimeLocale fmt t
 
 markdown :: Text -> Value
-markdown = toJSON . (writeHtmlString def) . (readMarkdown def)
+markdown = toJSON . (writeHtmlString (def { writerHighlight = True})) . (readMarkdown def)
                . (filter (/= '\r')) . unpack
 
 xmlEscape :: Text -> Value
