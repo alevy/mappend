@@ -1,29 +1,34 @@
-<header><h2>Edit Post</h2></header>
+<header>
+  <h2>Edit Post</h2>
+  <a href="/admin/posts">&larr; back</a>
+</header>
 $if(errors)$
-<ul class="errors">
+<div id="errors">
+  <h1>There were errors updating the post</h1>
+  <ul>
 $for(errs in errors)$$for(err in errs)$
-  <li>$err$</li>
+    <li>$err$</li>
 $endfor$$endfor$
-</ul>
+  </ul>
+</div>
 $endif$
 <form class="content" action="/admin/posts/$post.postId$"
   method="post" acceptCharset="UTF-8">
-  <a href="/admin/posts">&larr; back</a>
   <input type="hidden" name="_method" value="PUT"/>
-  <p><input type="text" name="title" id="title" value="$post.postTitle$"/></p>
+  <p$if errors.title$ class="error"$endif$>
+    <input type="text" name="title" id="title" placeholder="title"
+    value="$post.postTitle$"/></p>
   <p>Slug: <strong>$post.postSlug$</strong></p>
-  <p><textarea name="body" id="body">$post.postBody$</textarea></p>
+  <div class="bubble">
+    <div class="tabs">
+      <a href="#write" class="tab active">Write</a>
+      <a href="#preview" class="tab">Preview</a>
+    </div>
+    <div class="preview-content"></div>
+    <div class="write-content">
+      <textarea name="body" id="body">$post.postBody$</textarea>
+    </div>
+  </div>
+  <br/>
   <input type="submit" value="Update"/>
 </form>
-<br/>
-<form class="content" action="/admin/posts/$post.postId$" method="POST">
-  <input type="hidden" name="_method" value="DELETE"/>
-  <input type="submit" class="destroy" value="Delete Post"/>
-</form>
-
-<hr/>
-<p>Preview...</p>
-<div class="post">
-<h2>$post.postTitle$</h2>
-$markdown(post.postBody)$
-</div>

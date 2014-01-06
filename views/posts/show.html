@@ -15,36 +15,37 @@
       <div class="comment" id="comment-$comment.commentId$">
         <div class="comment-author vcard">
           <img src="$gravatar(comment.commentEmail, 48)$"/>
-          at
-          <time>$formatTime(comment.commentCommentedAt, "%l:%M%P")$</time>
-          on
-          <time>$formatTime(comment.commentCommentedAt, "%m/%d/%y")$</time>
           <cite class="fn">$comment.commentName$</cite>
           <span class="says">said:</span>
+          <time datetime="$comment.commentCommentedAt$">
+            $formatTime(comment.commentCommentedAt, "%m/%d/%y")$
+            $formatTime(comment.commentCommentedAt, "%l:%M%P")$
+          </time>
         </div>
         <p>$comment.commentComment$</p>
       </div>
     </li>
-    $sep$
-    <hr/>
     $endfor$
   </ol>
   <h4>Leave a comment...</h4>
   $if(errors)$
-  <ul class="errors" id="errors">
-    $for(errs in errors)$$for(err in errs)$
-    <li>$err$</li>
-    $endfor$$endfor$
-  </ul>
+  <div id="errors">
+    <h1>There were errors posting your comment</h1>
+    <ul>
+      $for(errs in errors)$$for(err in errs)$
+      <li>$err$</li>
+      $endfor$$endfor$
+    </ul>
+  </div>
   $endif$
   <form action="/posts/$post.postId$/comments" method="POST">
     <p$if(errors.name)$ class="error"$endif$>
-      <label for="name">Name<sup>*</sup></label>
+      <label for="name">Name</label><br/>
       <input type="text" name="name" id="name"
         placeholder="Jane Smith" value="$comment.commentName$"/>
     </p>
     <p$if(errors.email)$ class="error"$endif$>
-      <label for="email">Email<sup>*</sup></label>
+    <label for="email">Email <a href="#ftn-email" class="icon">?</a></label><br/>
       <input type="email" name="email" id="email"
         placeholder="jane@thesmiths.net" value="$comment.commentEmail$"/>
     </p>
@@ -54,3 +55,9 @@
     <p><input type="submit" value="Post comment"/></p>
   </form>
 </div>
+<p id="ftn-email" class="footnote">
+  Your e-mail won't be displayed in plaintext. It is stored for attribution,
+  and used to display your <a href="https://www.gravatar.com/">Gravatar</a>. If
+  you make a super interesting comment, I might e-mail you personally, but
+  don't count on it.
+</p>

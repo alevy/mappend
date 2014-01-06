@@ -1,10 +1,15 @@
-<header><h2>New Post</h2></header>
+<header>
+  <h2>New Post</h2>
+</header>
 $if(errors)$
-<ul class="errors">
+<div id="errors">
+  <h1>There were errors updating the post</h1>
+  <ul>
 $for(errs in errors)$$for(err in errs)$
-  <li>$err$</li>
+    <li>$err$</li>
 $endfor$$endfor$
-</ul>
+  </ul>
+</div>
 $endif$
 <form class="content" action="/admin/posts"
   method="post" acceptCharset="UTF-8">
@@ -16,9 +21,17 @@ $endif$
     placeholder="slug (leave blank to autogenerate from title)"
     value="$post.postSlug$"/>
   </p>
-  <p$if errors.body$ class="error"$endif$>
-    <textarea name="body" id="body" placeholder="post body...">$post.postBody$</textarea>
-  </p>
+  <div class="bubble$if errors.body$ error$endif$">
+    <div class="tabs">
+      <a href="#write" class="tab active">Write</a>
+      <a href="#preview" class="tab">Preview</a>
+    </div>
+    <div class="preview-content"></div>
+    <div class="write-content">
+      <textarea name="body" id="body" placeholder="post body...">$post.postBody$</textarea>
+    </div>
+  </div>
+  <br/>
   <input type="submit" value="Submit"/>
 </form>
 

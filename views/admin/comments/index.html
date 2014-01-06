@@ -1,5 +1,8 @@
-<header><h2>Comments: <em>$post.title$</em></h2></header>
+<header><h2>Comments: <em>$post.postTitle$</em></h2></header>
 <div class="content">
+$if(null(comments))$
+<p><em>No comments</em></p>
+$else$
   <ol id="comments">
   $for(comment in comments)$
   <li>
@@ -18,4 +21,5 @@
   </li>
   $endfor$
   </ol>
+$endif$
 </div>

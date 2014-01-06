@@ -1,10 +1,15 @@
 @import url(https://fonts.googleapis.com/css?family=Merriweather|Cantarell);
 
+html {
+  height: 100%;
+}
+
 body {
   font-size: 13pt;
   font-family: "Merriweather", serif;
   background-color: #f7f7f7;
   width: 100%;
+  height: 100%;
   margin: 0;
 }
 
@@ -24,10 +29,17 @@ body > header, body > section {
   padding-top: 5px;
   padding-left: 25px;
   padding-right: 25px;
+  border-left: 1px solid #eee;
+  border-right: 1px solid #eee;
 }
 
 body > header {
   text-align: center;
+}
+
+body > section {
+  min-height: 80%;
+  padding-bottom: 10px;
 }
 
 nav a {
@@ -87,6 +99,7 @@ section footer {
   font-size: small;
   text-align: center;
   border-top: 1px solid #ccc;
+  padding-top: 10px;
 }
 
 .comments {
@@ -99,11 +112,44 @@ ol#comments {
 
 ol#comments > li {
   list-style: none;
+  margin-bottom: 1em;
+}
 
+.comment {
+  border: 1px solid #f7f7f7;
+  position: relative;
+  margin-left: 4em;
+}
+
+.comment:before {
+  content: "";
+  border-width: 12px 12px 12px 0px;
+  border-style: solid;
+  border-color: rgba(247, 247, 247, 0) rgba(247, 247, 247, 1);
+  position: absolute;
+  left: -12px;
+  top: 4px;
+}
+
+.comment-author {
+  background-color: #f7f7f7;
+  padding: 0.5em;
 }
 
 .comment-author img {
-  display: block;
+  display: inline-block;
+  position: absolute;
+  left: -4em;
+  top: 0px;
+}
+
+.comment-author time {
+  display: inline-block;
+  float: right;
+}
+
+.comment > p {
+  padding-left: 0.5em;
 }
 
 .login_form input {
@@ -111,8 +157,29 @@ ol#comments > li {
   margin-bottom: 10px;
 }
 
-p.error {
-  border: 2px solid red;
+#errors {
+  border: 2px solid #e00;
+  border-radius: 3px;
+  background-color: #f7f7f7;
+  font-family: Cantarell, sans;
+  display: inline-block;
+}
+
+#errors h1 {
+  margin: 0px;
+  padding: 3px 15px;
+  font-size: 13pt;
+  color: white;
+  background-color: #e00;
+}
+
+#errors ul {
+  list-style: square;
+}
+
+.error {
+  border: 2px solid;
+  border-color: red !important;
   padding: 3px;
 }
 
@@ -122,19 +189,108 @@ p.error {
   border-left: 3px solid #ccc;
 }
 
-input[type="text"], textarea {
+.post time {
+  font-size: smaller;
+  font-style: italic;
+}
+
+label {
+  font-family: Cantarell, sans;
+}
+
+.icon {
+  border: 1px solid;
+  border-radius: 100px;
+  width: 1em;
+  height: 1em;
+  line-height: 1em;
+  display: inline-block;
+  text-align: center;
+  vertical-align: super;
+  font-size: 8pt;
+  color: inherit;
+  text-decoration: none;
+}
+
+.footnote {
+  display: none;
+  position: absolute;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 15px;
+  border: 3px solid #ccc;
+  border-radius: 5px;
+  font-family: Cantarell, sans-serif;
+  max-width: 20em;
+}
+
+input, textarea {
+  font-family: Cantarell, sans-serif;
+  font-size: 13pt;
   border: 1px solid #ccc;
-  font-family: Ubuntu, sans-serif;
-  font-size: 16px;
+}
+
+input[type="text"], input[type="email"], textarea {
   line-height: 1.5em;
+  background-color: white;
+  padding: 1%;
+  width: 98%;
+}
+
+input[type="submit"], input[type="button"] {
+  padding: 5px 10px;
+  background-color: #eee;
+}
+
+input[type="submit"]:active {
+  box-shadow: inset 0px 1px 1px #ccc;
+}
+
+textarea {
+  font-family: "Merriweather", serif;
+  height: 10em;
+  resize: vertical;
+}
+
+.bubble {
+  border: 3px solid #ccc;
+  border-radius: 3px;
+}
+
+.bubble .tabs {
+  border-bottom: 2px solid #eee;
+  padding-top: 10px;
+  padding-left: 10px;
+}
+
+.bubble a.tab {
+  display: inline-block;
+  text-decoration: none;
+  color: inherit;
+  padding: 10px;
+  margin-bottom: -2px;
+}
+
+.bubble a.tab.active {
+  border: 2px solid #eee;
+  border-bottom: 0px;
+  border-radius: 5px 5px 0 0;
+  background-color: white;
+}
+
+.bubble .preview-content {
+  display: none;
+}
+
+.bubble .write-content, .bubble .preview-content {
+  padding: 10px;
 }
 
 textarea#body {
-  height: 350px;
-}
-
-#admin input, textarea {
-  width: 100%;
+  height: 40em;
+  background-color: #eee;
+  border: 0px;
+  border-radius: 5px;
+  box-shadow: inset 0.5px 0.5px 1px 0.5px #ccc;
 }
 
 input#title {
@@ -145,6 +301,7 @@ input#title {
 hr {
   border: 0px;
   border-top: 1px solid #666;
+  width: 60%;
 }
 
 pre {

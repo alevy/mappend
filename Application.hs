@@ -8,6 +8,7 @@ import Blog.Controllers.PostsController
 import Network.Wai.Middleware.MethodOverridePost
 import Web.Simple
 import Web.Simple.Session
+import Web.Simple.Templates
 import Web.REST (restIndex, routeREST)
 
 app :: (Application -> IO ()) -> IO ()
@@ -19,6 +20,7 @@ app runner = do
       openIdController handleLogin
       routeName "login" loginPage
       routeName "logout" logout
+      routeName "about" $ render "about.html" ()
 
       routeName "admin" $ do
         routeName "posts" $ do

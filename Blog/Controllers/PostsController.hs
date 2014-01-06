@@ -18,10 +18,12 @@ import Data.Time.LocalTime (getZonedTime)
 import Database.PostgreSQL.ORM
 import Web.Simple
 import Web.Simple.Templates
+import Web.Frank (post)
 import Web.REST
 
 import Blog.Auth
 import Blog.Common
+import Blog.Helpers
 import Blog.Models
 import Blog.Models.Post
 
@@ -63,83 +65,92 @@ postsController = rest $ do
         Nothing -> respond notFound
 
 postsAdminController :: Controller AppSettings ()
-postsAdminController = requiresAdmin "/login" $ routeREST $ rest $ do
-  index $ withConnection $ \conn -> do
-    posts <- liftIO $ dbSelect conn $
-      setOrderBy "posted_at desc, published" $ modelDBSelect
-    let (published, drafts) = partition postPublished posts
-    renderLayout "layouts/admin.html"
-      "admin/posts/index.html" $
-      object ["published" .= published, "drafts" .= drafts]
-
-  edit $ withConnection $ \conn -> do
-    pid <- readQueryParam' "id"
-    (Just post) <- liftIO $
-      findRow conn pid :: Controller AppSettings (Maybe Post)
-    renderLayout "layouts/admin.html"
-      "admin/posts/edit.html" $
-        object ["post" .= post]
-
-  update $ withConnection $ \conn -> do
-    pid <- readQueryParam' "id"
-    (Just post) <- liftIO $ findRow conn pid
+postsAdminController = requiresAdmin "/login" $ do
+  post "/preview" $ do
     (params, _) <- parseForm
-    curTime <- liftIO $ getZonedTime
-    let mpost = do
-          pTitle <- (decodeUtf8 <$> lookup "title" params) <|>
-                      (pure $ postTitle post)
-          pBody <- (decodeUtf8 <$> lookup "body" params) <|>
-                    (pure $ postBody post)
-          pPublished <- lookup "published" params *> pure True <|>
-                          (pure $ postPublished post)
-          let pTime =
-                if (not $ postPublished post) && pPublished then
-                  curTime
-                  else postPostedAt post
-          return $ post { postTitle = pTitle
-                        , postBody = pBody
-                        , postPublished = pPublished
-                        , postPostedAt = pTime }
-    case mpost of
-      Just post0 -> do
-        epost <- liftIO $ trySave conn post0
-        case epost of
-          Left errs -> do
-            liftIO $ print epost
-            renderLayout "layouts/admin.html"
-                                    "admin/posts/edit.html" $
-                                    object [ "errors" .= errs, "post" .= post0 ]
-          Right p -> respond $ redirectTo $
-            "/admin/posts/" <> (S8.pack $ Prelude.show $ postId p) <> "/edit"
-      Nothing -> redirectBack
+    let mbody = decodeUtf8 <$> lookup "body" params
+    case mbody of
+      Nothing -> respond badRequest
+      Just body -> respond $
+                    okJson $ encode $ object ["body" .= markdown body]
 
-  new $ renderLayout "layouts/admin.html"
-    "admin/posts/new.html" $ Null
+  routeREST $ rest $ do
+    index $ withConnection $ \conn -> do
+      posts <- liftIO $ dbSelect conn $
+        setOrderBy "posted_at desc, published" $ modelDBSelect
+      let (published, drafts) = partition postPublished posts
+      renderLayout "layouts/admin.html"
+        "admin/posts/index.html" $
+        object ["published" .= published, "drafts" .= drafts]
 
-  create $ withConnection $ \conn -> do
-    (params, _) <- parseForm
-    curTime <- liftIO $ getZonedTime
-    let pTitle = decodeUtf8 <$> lookup "title" params
-        pBody = decodeUtf8 <$> lookup "body" params
-        pSlug = (((not . T.null) `mfilter`
-                    (decodeUtf8 <$> lookup "slug" params))
-                  <|> fmap slugFromTitle pTitle)
-        mpost = Post NullKey <$> pTitle <*> pSlug <*> pBody
-                <*> pure False <*> pure curTime
-    case mpost of
-      Just post0 -> do
-        epost <- liftIO $ trySave conn post0
-        case epost of
-          Left errs -> renderLayout "layouts/admin.html"
-                                    "admin/posts/new.html" $ object
-                                    [ "errors" .= errs, "post" .= post0 ]
-          Right p -> respond $ redirectTo $
-            encodeUtf8 $ "/posts/" <> (postSlug p)
-      Nothing -> redirectBack
+    edit $ withConnection $ \conn -> do
+      pid <- readQueryParam' "id"
+      (Just post) <- liftIO $
+        findRow conn pid :: Controller AppSettings (Maybe Post)
+      renderLayout "layouts/admin.html"
+        "admin/posts/edit.html" $
+          object ["post" .= post]
 
-  delete $ withConnection $ \conn -> do
-    pid <- readQueryParam' "id"
-    (Just post) <- liftIO $ findRow conn pid
-    liftIO $ destroy conn (post :: Post)
-    respond $ redirectTo "/admin/posts"
+    update $ withConnection $ \conn -> do
+      pid <- readQueryParam' "id"
+      (Just post) <- liftIO $ findRow conn pid
+      (params, _) <- parseForm
+      curTime <- liftIO $ getZonedTime
+      let mpost = do
+            pTitle <- (decodeUtf8 <$> lookup "title" params) <|>
+                        (pure $ postTitle post)
+            pBody <- (decodeUtf8 <$> lookup "body" params) <|>
+                      (pure $ postBody post)
+            pPublished <- lookup "published" params *> pure True <|>
+                            (pure $ postPublished post)
+            let pTime =
+                  if (not $ postPublished post) && pPublished then
+                    curTime
+                    else postPostedAt post
+            return $ post { postTitle = pTitle
+                          , postBody = pBody
+                          , postPublished = pPublished
+                          , postPostedAt = pTime }
+      case mpost of
+        Just post0 -> do
+          epost <- liftIO $ trySave conn post0
+          case epost of
+            Left errs -> do
+              liftIO $ print epost
+              renderLayout "layouts/admin.html"
+                                      "admin/posts/edit.html" $
+                                      object [ "errors" .= errs, "post" .= post0 ]
+            Right p -> respond $ redirectTo $
+              "/admin/posts/" <> (S8.pack $ Prelude.show $ postId p) <> "/edit"
+        Nothing -> redirectBack
+
+    new $ renderLayout "layouts/admin.html"
+      "admin/posts/new.html" $ Null
+
+    create $ withConnection $ \conn -> do
+      (params, _) <- parseForm
+      curTime <- liftIO $ getZonedTime
+      let pTitle = decodeUtf8 <$> lookup "title" params
+          pBody = decodeUtf8 <$> lookup "body" params
+          pSlug = (((not . T.null) `mfilter`
+                      (decodeUtf8 <$> lookup "slug" params))
+                    <|> fmap slugFromTitle pTitle)
+          mpost = Post NullKey <$> pTitle <*> pSlug <*> pBody
+                  <*> pure False <*> pure curTime
+      case mpost of
+        Just post0 -> do
+          epost <- liftIO $ trySave conn post0
+          case epost of
+            Left errs -> renderLayout "layouts/admin.html"
+                                      "admin/posts/new.html" $ object
+                                      [ "errors" .= errs, "post" .= post0 ]
+            Right p -> respond $ redirectTo $
+              encodeUtf8 $ "/posts/" <> (postSlug p)
+        Nothing -> redirectBack
+
+    delete $ withConnection $ \conn -> do
+      pid <- readQueryParam' "id"
+      (Just post) <- liftIO $ findRow conn pid
+      liftIO $ destroy conn (post :: Post)
+      respond $ redirectTo "/admin/posts"
 
