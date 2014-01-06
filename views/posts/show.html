@@ -45,7 +45,12 @@
         placeholder="Jane Smith" value="$comment.commentName$"/>
     </p>
     <p$if(errors.email)$ class="error"$endif$>
-    <label for="email">Email <a href="#ftn-email" class="icon">?</a></label><br/>
+    <label for="email">
+      Email
+      <a href="#ftn-email" class="reference">
+        <i class="fa fa-question-circle"></i>
+      <a>
+    </label><br/>
       <input type="email" name="email" id="email"
         placeholder="jane@thesmiths.net" value="$comment.commentEmail$"/>
     </p>
