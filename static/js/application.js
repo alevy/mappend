@@ -45,7 +45,7 @@
     }
   });
 
-  $('a.icon').click(function(e) {
+  $('a.reference').click(function(e) {
     e.preventDefault();
     e.stopPropagation();
     var link = $(this);
