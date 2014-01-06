@@ -15,6 +15,7 @@ $endif$
 <form class="content" action="/admin/posts/$post.postId$"
   method="post" acceptCharset="UTF-8">
   <input type="hidden" name="_method" value="PUT"/>
+  <input type="hidden" name="csrf_token" value="$csrf_token$">
   <p$if errors.title$ class="error"$endif$>
     <input type="text" name="title" id="title" placeholder="title"
     value="$post.postTitle$"/></p>
@@ -32,5 +33,6 @@ $endif$
     </div>
   </div>
   <br/>
-  <input type="submit" value="Update"/>
+  <input type="submit" value="Save"/>
+  <input type="submit" name="publish" value="Publish"/>
 </form>

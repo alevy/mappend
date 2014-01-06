@@ -13,6 +13,7 @@ $endfor$$endfor$
 $endif$
 <form class="content" action="/admin/posts"
   method="post" acceptCharset="UTF-8">
+  <input type="hidden" name="csrf_token" value="$csrf_token$">
   <p$if errors.title$ class="error"$endif$>
     <input type="text" name="title" id="title" placeholder="title"
     value="$post.postTitle$"/></p>
@@ -34,6 +35,7 @@ $endif$
     </div>
   </div>
   <br/>
-  <input type="submit" value="Submit"/>
+  <input type="submit" value="Save Draft"/>
+  <input type="submit" name="publish" value="Publish"/>
 </form>
 

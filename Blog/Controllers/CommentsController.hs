@@ -12,6 +12,7 @@ import Data.Text.Encoding
 import Data.Time.LocalTime
 import Database.PostgreSQL.ORM
 import Web.Simple
+import Web.Simple.Session
 import Web.Simple.Templates
 import Web.Frank
 
@@ -62,12 +63,16 @@ commentsAdminController = requiresAdmin "/login" $ do
     pid <- readQueryParam' "post_id"
     (Just p) <- liftIO $ findRow conn pid
     comments <- liftIO $ allComments conn p
+    csrf <- sessionLookup "csrf_token"
     renderLayout "layouts/admin.html"
       "admin/comments/index.html" $
-        object ["post" .= p, "comments" .= comments]
+        object [ "post" .= p, "comments" .= comments
+               , "csrf_token" .= csrf ]
     
   delete ":id" $ withConnection $ \conn -> do
     cid <- readQueryParam' "id"
+    (params, _) <- parseForm
+    verifyCSRF params
     (Just comment) <- liftIO $ (findRow conn cid :: IO (Maybe C.Comment))
     liftIO $ destroy conn comment
     redirectBack

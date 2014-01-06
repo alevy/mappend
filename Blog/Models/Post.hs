@@ -20,14 +20,9 @@ data Post = Post { postId :: DBKey
                  , postTitle :: Text
                  , postSlug :: Text
                  , postBody :: Text
-                 , postPublished :: Bool
-                 , postPostedAt :: ZonedTime} deriving (Show, Generic)
+                 , postPostedAt :: Maybe ZonedTime} deriving (Show, Generic)
 
 instance ToJSON Post
-
-postedAtStr :: Post -> String
-postedAtStr post = formatTime defaultTimeLocale "%B %e, %C%y %R" $
-                    postPostedAt post
 
 validateSlug :: Post -> ValidationError
 validateSlug = validate (\post -> postSlug post =~ pattern)

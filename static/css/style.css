@@ -65,6 +65,11 @@ h1, h2, h3, h4 {
   font-family: Cantarell, sans-serif;
 }
 
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
 article {
   padding-top: 15px;
 }
@@ -258,13 +263,13 @@ textarea {
 .bubble:-moz-full-screen .write-content,
 .bubble:-moz-full-screen .preview-content {
   height: 90%;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
 .bubble:-webkit-full-screen .write-content,
 .bubble:-webkit-full-screen .preview-content {
   height: 90%;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
 .bubble:-moz-full-screen textarea#body {

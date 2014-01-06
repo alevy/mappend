@@ -17,6 +17,7 @@ import Data.Text.Encoding
 import Data.Time.LocalTime (getZonedTime)
 import Database.PostgreSQL.ORM
 import Web.Simple
+import Web.Simple.Session
 import Web.Simple.Templates
 import Web.Frank (post)
 import Web.REST
@@ -30,7 +31,7 @@ import Blog.Models.Post
 atomFeed :: Controller AppSettings ()
 atomFeed = withConnection $ \conn -> do
   now <- liftIO getZonedTime
-  posts <- liftIO $ dbSelect conn $ addWhere_ "published"
+  posts <- liftIO $ dbSelect conn $ addWhere_ "posted_at is not null"
                                   $ setLimit 10
                                   $ setOrderBy "posted_at desc"
                                   $ modelDBSelect
@@ -43,7 +44,7 @@ postsController = rest $ do
   index $ withConnection $ \conn -> do
     mpage <- readQueryParam "offset"
     let page = maybe 0 id mpage
-    posts <- liftIO $ dbSelect conn $ addWhere_ "published"
+    posts <- liftIO $ dbSelect conn $ addWhere_ "posted_at is not null"
                                     $ setLimit 10
                                     $ setOffset (page * 10)
                                     $ setOrderBy "posted_at desc"
@@ -58,10 +59,10 @@ postsController = rest $ do
           addWhere "slug = ?" [slug :: S8.ByteString] $
           modelDBSelect)
       case mpost of
-        Just post -> do
-          comments <- liftIO $ allComments conn post
+        Just p -> do
+          comments <- liftIO $ allComments conn p
           render "posts/show.html" $
-            object ["post" .= post, "comments" .= comments]
+            object ["post" .= p, "comments" .= comments]
         Nothing -> respond notFound
 
 postsAdminController :: Controller AppSettings ()
@@ -71,86 +72,89 @@ postsAdminController = requiresAdmin "/login" $ do
     let mbody = decodeUtf8 <$> lookup "body" params
     case mbody of
       Nothing -> respond badRequest
-      Just body -> respond $
-                    okJson $ encode $ object ["body" .= markdown body]
+      Just pBody -> respond $
+                    okJson $ encode $ object ["body" .= markdown pBody]
 
   routeREST $ rest $ do
     index $ withConnection $ \conn -> do
       posts <- liftIO $ dbSelect conn $
-        setOrderBy "posted_at desc, published" $ modelDBSelect
-      let (published, drafts) = partition postPublished posts
+        setOrderBy "posted_at desc" $ modelDBSelect
+      let (published, drafts) = partition (isJust . postPostedAt) posts
+      csrf <- sessionLookup "csrf_token"
       renderLayout "layouts/admin.html"
         "admin/posts/index.html" $
-        object ["published" .= published, "drafts" .= drafts]
+        object [ "published" .= published, "drafts" .= drafts
+               , "csrf_token" .= csrf]
 
     edit $ withConnection $ \conn -> do
       pid <- readQueryParam' "id"
-      (Just post) <- liftIO $
+      (Just p) <- liftIO $
         findRow conn pid :: Controller AppSettings (Maybe Post)
+      csrf <- sessionLookup "csrf_token"
       renderLayout "layouts/admin.html"
         "admin/posts/edit.html" $
-          object ["post" .= post]
+          object ["post" .= p, "csrf_token" .= csrf]
 
     update $ withConnection $ \conn -> do
       pid <- readQueryParam' "id"
-      (Just post) <- liftIO $ findRow conn pid
+      (Just p) <- liftIO $ findRow conn pid
       (params, _) <- parseForm
+      verifyCSRF params
       curTime <- liftIO $ getZonedTime
       let mpost = do
             pTitle <- (decodeUtf8 <$> lookup "title" params) <|>
-                        (pure $ postTitle post)
+                        (pure $ postTitle p)
             pBody <- (decodeUtf8 <$> lookup "body" params) <|>
-                      (pure $ postBody post)
-            pPublished <- lookup "published" params *> pure True <|>
-                            (pure $ postPublished post)
-            let pTime =
-                  if (not $ postPublished post) && pPublished then
-                    curTime
-                    else postPostedAt post
-            return $ post { postTitle = pTitle
+                      (pure $ postBody p)
+            let postedAt = lookup "publish" params >> pure curTime <|>
+                              postPostedAt p
+            return $ p { postTitle = pTitle
                           , postBody = pBody
-                          , postPublished = pPublished
-                          , postPostedAt = pTime }
+                          , postPostedAt = postedAt }
       case mpost of
         Just post0 -> do
           epost <- liftIO $ trySave conn post0
           case epost of
             Left errs -> do
-              liftIO $ print epost
-              renderLayout "layouts/admin.html"
-                                      "admin/posts/edit.html" $
-                                      object [ "errors" .= errs, "post" .= post0 ]
-            Right p -> respond $ redirectTo $
-              "/admin/posts/" <> (S8.pack $ Prelude.show $ postId p) <> "/edit"
+              csrf <- sessionLookup "csrf_token"
+              renderLayout "layouts/admin.html" "admin/posts/edit.html" $
+                object [ "errors" .= errs, "post" .= post0
+                       , "csrf_token" .= csrf ]
+            Right _ -> respond $ redirectTo "/admin/posts/"
         Nothing -> redirectBack
 
-    new $ renderLayout "layouts/admin.html"
-      "admin/posts/new.html" $ Null
+    new $ do
+      csrf <- sessionLookup "csrf_token"
+      renderLayout "layouts/admin.html"
+        "admin/posts/new.html" $ object [ "csrf_token" .= csrf ]
 
     create $ withConnection $ \conn -> do
       (params, _) <- parseForm
+      verifyCSRF params
       curTime <- liftIO $ getZonedTime
       let pTitle = decodeUtf8 <$> lookup "title" params
           pBody = decodeUtf8 <$> lookup "body" params
           pSlug = (((not . T.null) `mfilter`
                       (decodeUtf8 <$> lookup "slug" params))
                     <|> fmap slugFromTitle pTitle)
+          postedAt = lookup "publish" params >> pure curTime
           mpost = Post NullKey <$> pTitle <*> pSlug <*> pBody
-                  <*> pure False <*> pure curTime
+                  <*> pure postedAt
       case mpost of
         Just post0 -> do
           epost <- liftIO $ trySave conn post0
           case epost of
-            Left errs -> renderLayout "layouts/admin.html"
-                                      "admin/posts/new.html" $ object
-                                      [ "errors" .= errs, "post" .= post0 ]
-            Right p -> respond $ redirectTo $
-              encodeUtf8 $ "/posts/" <> (postSlug p)
+            Left errs -> do
+              csrf <- sessionLookup "csrf_token"
+              renderLayout "layouts/admin.html" "admin/posts/new.html" $
+                object [ "errors" .= errs, "post" .= post0
+                       , "csrf_token" .= csrf ]
+            Right p -> respond $ redirectTo "/admin/posts/"
         Nothing -> redirectBack
 
     delete $ withConnection $ \conn -> do
       pid <- readQueryParam' "id"
-      (Just post) <- liftIO $ findRow conn pid
-      liftIO $ destroy conn (post :: Post)
+      (Just p) <- liftIO $ findRow conn pid
+      liftIO $ destroy conn (p :: Post)
       respond $ redirectTo "/admin/posts"
 

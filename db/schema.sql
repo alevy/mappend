@@ -59,9 +59,8 @@ CREATE TABLE post (
     id integer NOT NULL,
     title character varying(255),
     body text,
-    posted_at timestamp with time zone DEFAULT now() NOT NULL,
-    slug character varying(32) NOT NULL,
-    published boolean DEFAULT true NOT NULL
+    posted_at timestamp with time zone DEFAULT now(),
+    slug character varying(32) NOT NULL
 );
 
 

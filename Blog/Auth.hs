@@ -8,11 +8,13 @@ import Control.Monad
 import Control.Monad.IO.Class
 import Data.Aeson
 import qualified Data.ByteString.Char8 as S8
+import Data.Hex
 import qualified Data.Text as T
 import Data.Text.Encoding
 import Data.Maybe
 import Database.PostgreSQL.Simple
 import Network.HTTP.Conduit (withManager)
+import System.Entropy
 import Web.Frank
 import Web.Simple
 import Web.Simple.Session
@@ -52,6 +54,8 @@ handleLogin openid = do
   ret <- fromMaybe "/" `fmap` sessionLookup "return_to"
   sessionDelete "return_to"
   sessionInsert "user" $ encodeUtf8 openid
+  csrfToken <- liftIO $ hex <$> getEntropy 32
+  sessionInsert "csrf_token" $ csrfToken
   respond $ redirectTo ret
 
 logout :: Controller AppSettings ()
