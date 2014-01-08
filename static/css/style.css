@@ -13,11 +13,11 @@ body {
   margin: 0;
 }
 
-@media (min-width: 90em) {
+@media (min-width: 50em) {
 
   body {
     max-width: 50em;
-    margin-left: 30em;
+    margin: 0 auto;
   }
 
 }
