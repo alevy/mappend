@@ -11,7 +11,6 @@ import Data.Aeson
 import qualified Data.ByteString.Char8 as S8
 import Data.List (partition)
 import Data.Maybe
-import Data.Monoid
 import qualified Data.Text as T
 import Data.Text.Encoding
 import Data.Time.LocalTime (getZonedTime)
@@ -106,10 +105,11 @@ postsAdminController = requiresAdmin "/login" $ do
                         (pure $ postTitle p)
             pBody <- (decodeUtf8 <$> lookup "body" params) <|>
                       (pure $ postBody p)
-            let postedAt = lookup "publish" params >> pure curTime <|>
+            let postedAt = (lookup "publish" params >> pure curTime) <|>
                               postPostedAt p
             return $ p { postTitle = pTitle
                           , postBody = pBody
+                          , postBodyHtml = markdown pBody
                           , postPostedAt = postedAt }
       case mpost of
         Just post0 -> do
@@ -139,7 +139,7 @@ postsAdminController = requiresAdmin "/login" $ do
                     <|> fmap slugFromTitle pTitle)
           postedAt = lookup "publish" params >> pure curTime
           mpost = Post NullKey <$> pTitle <*> pSlug <*> pBody
-                  <*> pure postedAt
+                  <*> fmap markdown pBody <*> pure postedAt
       case mpost of
         Just post0 -> do
           epost <- liftIO $ trySave conn post0
@@ -149,7 +149,7 @@ postsAdminController = requiresAdmin "/login" $ do
               renderLayout "layouts/admin.html" "admin/posts/new.html" $
                 object [ "errors" .= errs, "post" .= post0
                        , "csrf_token" .= csrf ]
-            Right p -> respond $ redirectTo "/admin/posts/"
+            Right _ -> respond $ redirectTo "/admin/posts/"
         Nothing -> redirectBack
 
     delete $ withConnection $ \conn -> do

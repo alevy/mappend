@@ -33,6 +33,10 @@ $endif$
     </div>
   </div>
   <br/>
+  $if post.postPostedAt$
   <input type="submit" value="Save"/>
+  $else$
+  <input type="submit" value="Save Draft"/>
   <input type="submit" name="publish" value="Publish"/>
+  $endif$
 </form>

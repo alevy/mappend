@@ -12,7 +12,7 @@ $for(post in @)$
     <time datetime="$post.postPostedAt$">$formatTime(post.postPostedAt)$</time>
   </header>
   <div class="content">
-    $markdown(post.postBody)$
+    $post.postBodyHtml$
   </div>
 </article>
 $sep$

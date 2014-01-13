@@ -4,7 +4,7 @@ module Blog.Helpers where
 import Data.Aeson
 import Data.List
 import Data.Maybe
-import Data.Text (Text, unpack, replace)
+import Data.Text (Text, unpack, pack, replace)
 import Data.Time.LocalTime
 import Data.Time.Format
 import Network.Gravatar
@@ -16,7 +16,6 @@ helperFunctions :: FunctionMap
 helperFunctions = fromList
   [ ("formatTime", toFunction timeFormatter)
   , ("gravatar", toFunction gravatarUrl)
-  , ("markdown", toFunction markdown)
   , ("xmlEscape", toFunction xmlEscape)
   , ("zonedToUTC", toFunction zonedToUTC)]
 
@@ -29,9 +28,10 @@ timeFormatter t mfmt =
   let fmt = fromMaybe "%B %e, %C%y %l:%M%P" mfmt
   in toJSON $ formatTime defaultTimeLocale fmt t
 
-markdown :: Text -> Value
-markdown = toJSON . (writeHtmlString (def { writerHighlight = True})) . (readMarkdown def)
-               . (filter (/= '\r')) . unpack
+markdown :: Text -> Text
+markdown = pack . (writeHtmlString (def { writerHighlight = True}))
+                . (readMarkdown def)
+                . (filter (/= '\r')) . unpack
 
 xmlEscape :: Text -> Value
 xmlEscape raw = toJSON $ foldl' escapr (replace "&" "&amp;" raw) escapeMap

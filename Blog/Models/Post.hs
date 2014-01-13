@@ -8,11 +8,9 @@ import Data.Monoid
 import Data.Text (Text)
 import qualified Data.Text as T
 import Data.Time.LocalTime
-import Data.Time.Format
 import Database.PostgreSQL.ORM
 import Text.Regex.TDFA
 import Text.Regex.TDFA.Text ()
-import System.Locale
 
 import GHC.Generics
 
@@ -20,6 +18,7 @@ data Post = Post { postId :: DBKey
                  , postTitle :: Text
                  , postSlug :: Text
                  , postBody :: Text
+                 , postBodyHtml :: Text
                  , postPostedAt :: Maybe ZonedTime} deriving (Show, Generic)
 
 instance ToJSON Post

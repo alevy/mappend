@@ -4,7 +4,7 @@
     <time datetime="$post.postPostedAt$">$formatTime(post.postPostedAt)$</time>
   </header>
   <div class="content">
-    $markdown(post.postBody)$
+    $post.postBodyHtml$
   </div>
 </article>
 <div class="comments content">

@@ -60,7 +60,8 @@ CREATE TABLE post (
     title character varying(255),
     body text,
     posted_at timestamp with time zone DEFAULT now(),
-    slug character varying(32) NOT NULL
+    slug character varying(32) NOT NULL,
+    body_html text NOT NULL
 );
 
 
