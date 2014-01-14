@@ -6,15 +6,25 @@
     <link rel="stylesheet" type="text/css" href="/css/font-awesome.css">
     <link rel="stylesheet" type="text/css" href="/css/style.css">
     <link rel="alternate" type="application/atom+xml" title="mappend Atom Feed" href="/feed" />
+    $if(page.post.postTitle)$
+    <title>mappend - $page.post.postTitle$</title>
+    $else$
     <title>mappend</title>
+    $endif$
 </head>
 <body>
   <header>
     <h1><a href="/">mappend</a></h1>
     <nav>
-      <a href="/">home</a> |
-      <a href="/about">about</a> |
-      <a href="/feed">subscribe</a>
+      <ul>
+        <li><a href="/">home</a></li>
+        <li><a href="/about">about</a></li>
+        <li>
+          <a href="/feed">
+            subscribe
+            <img src="/images/feed-icon.svg" height="12"/>
+        </a>
+      </li>
     </nav>
   </header>
   <section>
