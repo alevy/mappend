@@ -8,7 +8,7 @@ import Blog.Helpers
 up :: Connection -> IO ()
 up conn = (flip migrate) conn $ do
   add_column "post" "body_html" "text"
-  liftIO $ forEach_ conn "select id,body from post" $ \(body, pid) -> void $
+  liftIO $ forEach_ conn "select body,id from post" $ \(body, pid) -> void $
     execute conn "update post set body_html = ? where id = ?"
       (markdown body, pid :: Int)
   change_column "post" "body_html" "set NOT NULL"
