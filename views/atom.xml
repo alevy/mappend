@@ -16,7 +16,7 @@
    <link href="https://mappend.net/posts/$post.postSlug$"/>
    <updated>$zonedToUTC(post.postPostedAt)$</updated>
    <id>https://mappend.net/posts/$post.postSlug$</id>
-   <content type="html">$xmlEscape(markdown(post.postBody))$</content>
+   <content type="html">$xmlEscape(post.postBodyHtml)$</content>
  </entry>
  $endfor$
 
