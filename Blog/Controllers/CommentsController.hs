@@ -57,13 +57,12 @@ commentsAdminController = requiresAdmin "/login" $ do
         object [ "post" .= p, "comments" .= comments
                , "csrf_token" .= csrf ]
 
-  delete ":id" $ withConnection $ \conn -> do
+  delete ":id" $ do
     cid <- readQueryParam' "id"
     (params, _) <- parseForm
     verifyCSRF params
-    when (isJust $ lookup "spam" params) $ respond badRequest
-    redirectBack
-    (Just comment) <- liftIO $ (findRow conn cid :: IO (Maybe C.Comment))
-    liftIO $ destroy conn comment
+    withConnection $ \conn -> liftIO $ do
+      (Just comment) <- findRow conn cid :: IO (Maybe C.Comment)
+      destroy conn comment
     redirectBack
 
