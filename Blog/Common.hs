@@ -1,14 +1,18 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Blog.Common
-  ( AppSettings, newAppSettings, verifyCSRF
+  ( AppSettings, newAppSettings, verifyCSRF, httpManager, remoteIp
   , module Web.Simple.PostgreSQL
   ) where
 
 import Control.Applicative
 import Control.Monad
+import Control.Monad.IO.Class
 import qualified Data.ByteString as S
+import qualified Data.ByteString.Char8 as S8
 import Data.Maybe
 import Data.Monoid
+import Network.HTTP.Client (Manager, newManager, defaultManagerSettings)
+import Network.Socket
 import Web.Simple
 import Web.Simple.PostgreSQL
 import Web.Simple.Templates
@@ -16,12 +20,16 @@ import Web.Simple.Session
 import Blog.Helpers
 
 data AppSettings = AppSettings { appDB :: PostgreSQLConn
+                               , appHttpManager :: Manager
                                , appSession :: Maybe Session }
 
 newAppSettings :: IO AppSettings
 newAppSettings = do
   db <- createPostgreSQLConn
-  return $ AppSettings { appDB = db , appSession = Nothing }
+  mgr <- newManager defaultManagerSettings
+  return $ AppSettings { appDB = db
+                       , appSession = Nothing
+                       , appHttpManager = mgr }
 
 instance HasPostgreSQL AppSettings where
   postgreSQLConn = appDB
@@ -42,3 +50,20 @@ verifyCSRF params = do
   let formCsrf = lookup "csrf_token" params
   when (any isNothing [sessionCsrf, formCsrf] || sessionCsrf /= formCsrf) $
     respond badRequest
+
+httpManager :: Controller AppSettings Manager
+httpManager = appHttpManager <$> controllerState
+
+remoteIp :: Controller AppSettings S.ByteString
+remoteIp = do
+  req <- request
+  let hdrs = requestHeaders req
+      mrip = listToMaybe . catMaybes $
+              [lookup "x-real-ip" hdrs
+              , S8.takeWhile (/= ',') <$> lookup "x-forwarded-for" hdrs]
+  nonProxyIp <- liftIO $
+    getNameInfo [NI_NUMERICHOST] True False $ remoteHost req
+  return $ case mrip of
+    Just ip -> ip
+    Nothing -> S8.pack <$> fromMaybe "no-client-address" $ fst nonProxyIp
+

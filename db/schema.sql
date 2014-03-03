@@ -37,7 +37,8 @@ CREATE TABLE comment (
     email character varying(255) NOT NULL,
     comment text NOT NULL,
     post_id integer,
-    commented_at timestamp with time zone DEFAULT now() NOT NULL
+    commented_at timestamp with time zone DEFAULT now() NOT NULL,
+    is_spam boolean DEFAULT false NOT NULL
 );
 
 
