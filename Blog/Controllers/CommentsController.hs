@@ -55,7 +55,7 @@ commentsAdminController = requiresAdmin "/login" $ do
     renderLayout "layouts/admin.html"
       "admin/comments/index.html" $
         object [ "post" .= p, "comments" .= comments
-               , "csrf_token" .= csrf ]
+               , "csrf_token" .= fmap decodeUtf8 csrf ]
 
   delete ":id" $ do
     cid <- readQueryParam' "id"

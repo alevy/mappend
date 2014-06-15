@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, MultiParamTypeClasses #-}
 module Blog.Common
   ( AppSettings, newAppSettings, verifyCSRF, httpManager, remoteIp
   , module Web.Simple.PostgreSQL
@@ -40,7 +40,7 @@ instance HasSession AppSettings where
     cs <- controllerState
     putState $ cs { appSession = Just sess }
 
-instance HasTemplates AppSettings where
+instance HasTemplates IO AppSettings where
   defaultLayout = Just <$> getTemplate "layouts/main.html"
   functionMap = return $ defaultFunctionMap <> helperFunctions
 

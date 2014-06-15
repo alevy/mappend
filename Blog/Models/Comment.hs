@@ -70,8 +70,8 @@ testSpam comment = do
   req <- request
   let requestObject = encode $ object
                         [ "comment" .= commentComment comment
-                        , "ip" .= rIp
-                        , "site" .= requestHeaderHost req
+                        , "ip" .= decodeUtf8 rIp
+                        , "site" .= (decodeUtf8 `fmap` (requestHeaderHost req))
                         , "whitelist" .= ("127.0.0.1" :: Text) ]
       spamReq = blogspamUrl { H.requestBody = H.RequestBodyLBS $ requestObject }
   liftIO $ do

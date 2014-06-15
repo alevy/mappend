@@ -2,7 +2,6 @@
 module Blog.Controllers.PostsController where
 
 import Prelude hiding (show)
-import qualified Prelude
 
 import Control.Applicative
 import Control.Monad
@@ -37,7 +36,7 @@ atomFeed = withConnection $ \conn -> do
   renderPlain "atom.xml" $
     object ["posts" .= (posts :: [Post]), "now" .= now]
 
-postsController :: REST AppSettings
+postsController :: REST IO AppSettings
 postsController = rest $ do
 
   index $ withConnection $ \conn -> do
@@ -83,7 +82,7 @@ postsAdminController = requiresAdmin "/login" $ do
       renderLayout "layouts/admin.html"
         "admin/posts/index.html" $
         object [ "published" .= published, "drafts" .= drafts
-               , "csrf_token" .= csrf]
+               , "csrf_token" .= fmap decodeUtf8 csrf]
 
     edit $ withConnection $ \conn -> do
       pid <- readQueryParam' "id"
@@ -92,7 +91,7 @@ postsAdminController = requiresAdmin "/login" $ do
       csrf <- sessionLookup "csrf_token"
       renderLayout "layouts/admin.html"
         "admin/posts/edit.html" $
-          object ["post" .= p, "csrf_token" .= csrf]
+          object ["post" .= p, "csrf_token" .= fmap decodeUtf8 csrf]
 
     update $ withConnection $ \conn -> do
       pid <- readQueryParam' "id"
@@ -119,14 +118,14 @@ postsAdminController = requiresAdmin "/login" $ do
               csrf <- sessionLookup "csrf_token"
               renderLayout "layouts/admin.html" "admin/posts/edit.html" $
                 object [ "errors" .= errs, "post" .= post0
-                       , "csrf_token" .= csrf ]
+                       , "csrf_token" .= fmap decodeUtf8 csrf ]
             Right _ -> respond $ redirectTo "/admin/posts/"
         Nothing -> redirectBack
 
     new $ do
       csrf <- sessionLookup "csrf_token"
       renderLayout "layouts/admin.html"
-        "admin/posts/new.html" $ object [ "csrf_token" .= csrf ]
+        "admin/posts/new.html" $ object [ "csrf_token" .= fmap decodeUtf8 csrf ]
 
     create $ withConnection $ \conn -> do
       (params, _) <- parseForm
@@ -148,7 +147,7 @@ postsAdminController = requiresAdmin "/login" $ do
               csrf <- sessionLookup "csrf_token"
               renderLayout "layouts/admin.html" "admin/posts/new.html" $
                 object [ "errors" .= errs, "post" .= post0
-                       , "csrf_token" .= csrf ]
+                       , "csrf_token" .= fmap decodeUtf8 csrf ]
             Right _ -> respond $ redirectTo "/admin/posts/"
         Nothing -> redirectBack
 

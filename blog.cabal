@@ -27,7 +27,7 @@ executable blog
     http-client,
     http-conduit,
     network,
-    simple >= 0.6.1,
+    simple >= 0.10,
     simple-session,
     simple-templates,
     simple-postgresql-orm,
