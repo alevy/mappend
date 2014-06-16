@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
- <title>mappend</title>
- <link href="https://mappend.net/feed" rel="self"/>
- <link href="https://mappend.net/"/>
+ <title>mostly typed</title>
+ <link href="http://mostlytyped.com/feed" rel="self"/>
+ <link href="http://mostlytyped.com/"/>
  <updated>$zonedToUTC(now)$</updated>
- <id>https://mappend.net/</id>
+ <id>http://mostlytyped.net/</id>
  <author>
    <name>Amit Levy</name>
  </author>
@@ -13,7 +13,7 @@
  $for post in posts$
  <entry>
    <title>$post.postTitle$</title>
-   <link href="https://mappend.net/posts/$post.postSlug$"/>
+   <link href="http://mostlytyped.com/posts/$post.postSlug$"/>
    <updated>$zonedToUTC(post.postPostedAt)$</updated>
    <id>https://mappend.net/posts/$post.postSlug$</id>
    <content type="html">$xmlEscape(post.postBodyHtml)$</content>
