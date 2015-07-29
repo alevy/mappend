@@ -75,7 +75,7 @@ testSpam comment = do
                         , "whitelist" .= ("127.0.0.1" :: Text) ]
       spamReq = blogspamUrl { H.requestBody = H.RequestBodyLBS $ requestObject }
   liftIO $ do
-  mres <- decode <$> H.responseBody <$> H.httpLbs spamReq mgr
+    mres <- decode <$> H.responseBody <$> H.httpLbs spamReq mgr
   case mres of
     Nothing -> fail "couldn't decode response"
     Just res | result res == "OK" -> return comment

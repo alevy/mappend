@@ -1,8 +1,8 @@
 @font-face {
-  font-family: 'Cantarell';
+  font-family: 'Inika';
   font-style: normal;
   font-weight: 400;
-  src: local('Cantarell Regular'), local('Cantarell-Regular'), url(//themes.googleusercontent.com/static/fonts/cantarell/v4/V86VyqXbc09Sss3BPsMj1z8E0i7KZn-EPnyo3HZu7kw.woff) format('woff');
+  src: local('Inika'), url(http://fonts.gstatic.com/s/inika/v4/r3Z5gCAKW2R-pq9oz6gfZg.woff2) format('woff2'), url(http://fonts.gstatic.com/s/inika/v4/BKu7l_qT90IBrcPZgEIfVQ.woff) format('woff');
 }
 @font-face {
   font-family: 'Merriweather';
@@ -18,7 +18,8 @@ html {
 body {
   font-size: 13pt;
   font-family: "Merriweather", serif;
-  background-color: #f7f7f7;
+  background-color: #fff;
+  color: #444;
   width: 100%;
   height: 100%;
   margin: 0;
@@ -40,8 +41,6 @@ body > header, body > section {
   padding-top: 5px;
   padding-left: 25px;
   padding-right: 25px;
-  border-left: 1px solid #eee;
-  border-right: 1px solid #eee;
 }
 
 body > header {
@@ -72,7 +71,7 @@ body > section {
 }
 
 nav a {
-  color: blue;
+  color: #1079AC;
   text-decoration: none;
 }
 
@@ -87,11 +86,11 @@ h1 a {
 
 h2 a {
   text-decoration: none;
-  color: #333;
+  color: #1079AC;
 }
 
 h1, h2, h3, h4 {
-  font-family: Cantarell, sans-serif;
+  font-family: Inika, sans-serif;
 }
 
 table {
@@ -195,7 +194,7 @@ ol#comments > li {
   border: 2px solid #e00;
   border-radius: 3px;
   background-color: #f7f7f7;
-  font-family: Cantarell, sans;
+  font-family: Inika, sans;
   display: inline-block;
 }
 
@@ -229,7 +228,7 @@ ol#comments > li {
 }
 
 label {
-  font-family: Cantarell, sans;
+  font-family: Inika, sans;
 }
 
 .reference {
@@ -246,14 +245,22 @@ label {
   padding: 15px;
   border: 3px solid #ccc;
   border-radius: 5px;
-  font-family: Cantarell, sans-serif;
+  font-family: Inika, sans-serif;
   max-width: 20em;
 }
 
-input, textarea {
-  font-family: Cantarell, sans-serif;
+input {
+  font-family: Inika, sans-serif;
   font-size: 13pt;
   border: 1px solid #ccc;
+}
+
+textarea {
+  font-family: "Merriweather", serif;
+  height: 10em;
+  font-size: 13pt;
+  border: 1px solid #ccc;
+  resize: vertical;
 }
 
 input[type="text"], input[type="email"], textarea {
@@ -270,12 +277,6 @@ input[type="submit"], input[type="button"] {
 
 input[type="submit"]:active {
   box-shadow: inset 0px 1px 1px #ccc;
-}
-
-textarea {
-  font-family: "Merriweather", serif;
-  height: 10em;
-  resize: vertical;
 }
 
 .bubble {
