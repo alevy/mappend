@@ -76,11 +76,11 @@ testSpam comment = do
       spamReq = blogspamUrl { H.requestBody = H.RequestBodyLBS $ requestObject }
   liftIO $ do
     mres <- decode <$> H.responseBody <$> H.httpLbs spamReq mgr
-  case mres of
-    Nothing -> fail "couldn't decode response"
-    Just res | result res == "OK" -> return comment
-             | result res == "ERROR" -> fail . show $ reason res
-             | otherwise -> do
-                print res
-                return $ comment { commentIsSpam = True }
+    case mres of
+      Nothing -> fail "couldn't decode response"
+      Just res | result res == "OK" -> return comment
+               | result res == "ERROR" -> fail . show $ reason res
+               | otherwise -> do
+                  print res
+                  return $ comment { commentIsSpam = True }
 
