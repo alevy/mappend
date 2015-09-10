@@ -9,7 +9,8 @@ import Data.Time.LocalTime
 import Data.Time.Format
 import Network.Gravatar
 import Text.Pandoc (writeHtmlString, readMarkdown, writerHighlight)
-import System.Locale
+import Text.Pandoc.Error
+--import System.Locale
 import Web.Simple.Templates
 
 helperFunctions :: FunctionMap
@@ -30,7 +31,7 @@ timeFormatter t mfmt =
 
 markdown :: Text -> Text
 markdown = pack . (writeHtmlString (def { writerHighlight = True}))
-                . (readMarkdown def)
+                . handleError . (readMarkdown def)
                 . (filter (/= '\r')) . unpack
 
 xmlEscape :: Text -> Value
