@@ -1,1 +1,1 @@
-web: ./dist/build/blog/blog | tai64n
+web: ./dist/build/blog/blog
