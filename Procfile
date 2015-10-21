@@ -1,1 +1,1 @@
-web: ./dist/build/blog/blog | tai64n
+web: cabal exec $PWD/dist/build/blog/blog
