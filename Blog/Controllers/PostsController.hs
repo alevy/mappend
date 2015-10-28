@@ -33,7 +33,7 @@ atomFeed = withConnection $ \conn -> do
                                   $ setLimit 10
                                   $ setOrderBy "posted_at desc"
                                   $ modelDBSelect
-  renderPlain "atom.xml" $
+  renderPlain "feed.atom" $
     object ["posts" .= (posts :: [Post]), "now" .= now]
 
 postsController :: REST IO AppSettings
