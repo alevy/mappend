@@ -12,7 +12,10 @@ $for(post in @)$
     <time datetime="$post.postPostedAt$">$formatTime(post.postPostedAt)$</time>
   </header>
   <div class="content">
-    $post.postBodyHtml$
+    <div>
+    $truncate(800, post.postBodyHtml)$
+    </div>
+    <p><a href="/posts/$post.postSlug$">Continue reading &rarr;</a></p>
   </div>
 </article>
 $sep$

@@ -24,6 +24,7 @@ executable blog
     entropy,
     gravatar,
     hex,
+    html-truncate,
     http-client,
     http-conduit,
     network,

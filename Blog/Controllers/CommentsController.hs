@@ -65,4 +65,3 @@ commentsAdminController = requiresAdmin "/login" $ do
       (Just comment) <- findRow conn cid :: IO (Maybe C.Comment)
       destroy conn comment
     redirectBack
-
