@@ -18,11 +18,49 @@ html {
 body {
   font-size: 13pt;
   font-family: "Merriweather", serif;
-  background-color: #fff;
   color: #444;
   width: 100%;
   height: 100%;
   margin: 0;
+}
+
+
+#wrapper > header, body > section {
+  margin: 0px;
+  padding-top: 5px;
+  padding-left: 25px;
+  padding-right: 25px;
+}
+
+#wrapper > header {
+  text-align: center;
+}
+
+#wrapper > header nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+#wrapper > header nav li {
+  display: inline-block;
+}
+
+#wrapper > header nav li:before {
+  content: "| ";
+}
+
+#wrapper > header nav li:first-child:before {
+  content: "";
+}
+
+#wrapper > section {
+  min-height: 80%;
+  padding-bottom: 10px;
+}
+
+#wrapper {
+    padding: 70px;
 }
 
 @media (min-width: 50em) {
@@ -30,44 +68,20 @@ body {
   body {
     max-width: 50em;
     margin: 0 auto;
+    background-image: url('/images/monterey.jpg');
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: center center;
   }
 
-}
+  #wrapper {
+    background-color: white;
+    margin: 40px auto;
+    max-width: 600px;
+    border-radius: 3px;
+    box-shadow: 0px 0px 5px 5px rgba(0, 0, 0, 0.15);
+  }
 
-
-body > header, body > section {
-  background: #fff;
-  margin: 0px;
-  padding-top: 5px;
-  padding-left: 25px;
-  padding-right: 25px;
-}
-
-body > header {
-  text-align: center;
-}
-
-body > header nav ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-body > header nav li {
-  display: inline-block;
-}
-
-body > header nav li:before {
-  content: "| ";
-}
-
-body > header nav li:first-child:before {
-  content: "";
-}
-
-body > section {
-  min-height: 80%;
-  padding-bottom: 10px;
 }
 
 nav a {
