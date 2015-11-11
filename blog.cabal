@@ -14,6 +14,7 @@ cabal-version:       >=1.8
 
 executable blog
   main-is: Main.hs
+  hs-source-dirs: src
   ghc-options: -O2 -Wall -fno-warn-unused-do-bind
   build-depends:
     base,
