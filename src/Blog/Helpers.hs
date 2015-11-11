@@ -4,16 +4,18 @@ module Blog.Helpers where
 import Prelude hiding (truncate)
 
 import Data.Aeson
+import Data.Default
 import Data.List
 import Data.Maybe
-import Data.Text (Text, unpack, pack, replace)
+import Data.Text (Text, replace, unpack)
+import Data.Text.Lazy (fromChunks, toStrict)
 import Data.Time.LocalTime
 import Data.Time.Format
 import Network.Gravatar
+import Text.Blaze.Html.Renderer.Text (renderHtml)
+import Text.Highlighting.Kate (formatHtmlBlock, defaultFormatOpts, highlightAs)
+import qualified Text.Markdown as Markdown
 import Text.HTML.Truncate (truncateHtml)
-import Text.Pandoc (writeHtmlString, readMarkdown, writerHighlight)
-import Text.Pandoc.Error
---import System.Locale
 import Web.Simple.Templates
 
 helperFunctions :: FunctionMap
@@ -33,10 +35,16 @@ timeFormatter t mfmt =
   let fmt = fromMaybe "%B %e, %C%y %l:%M%P" mfmt
   in toJSON $ formatTime defaultTimeLocale fmt t
 
+markdownSettings :: Markdown.MarkdownSettings
+markdownSettings =
+  let renderer lang (src,_) = formatHtmlBlock defaultFormatOpts $
+                                highlightAs (maybe "text" unpack lang) $
+                                unpack src
+  in def { Markdown.msBlockCodeRenderer = renderer }
+
 markdown :: Text -> Text
-markdown = pack . (writeHtmlString (def { writerHighlight = True}))
-                . handleError . (readMarkdown def)
-                . (filter (/= '\r')) . unpack
+markdown = toStrict . renderHtml
+         . (Markdown.markdown markdownSettings) . fromChunks . (:[])
 
 truncate :: Int -> Text -> Value
 truncate len body = toJSON $ truncateHtml len body

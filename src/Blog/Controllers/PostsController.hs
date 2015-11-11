@@ -22,7 +22,7 @@ import Web.REST
 
 import Blog.Auth
 import Blog.Common
-import Blog.Helpers
+import Blog.Helpers (markdown)
 import Blog.Models
 import Blog.Models.Post
 
@@ -80,7 +80,6 @@ postsAdminController = requiresAdmin "/login" $ do
     mpost <- liftIO $ findRow conn pid
     case mpost of
       Just post0 -> do
-        
         epost <- liftIO $ trySave conn $ post0 { postPostedAt = Nothing }
         case epost of
           Left errs -> do
