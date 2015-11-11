@@ -4,7 +4,7 @@
 name:                blog
 version:             0.1.0.0
 homepage:            http://mappend.net/
-license:             LGPL-3
+license:             AGPL-3
 license-file:        LICENSE
 author:              Amit Levy
 maintainer:          amit@amitlevy.com
