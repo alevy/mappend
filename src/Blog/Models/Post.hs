@@ -21,7 +21,9 @@ data Post = Post { postId :: DBKey
                  , postBodyHtml :: Text
                  , postPostedAt :: Maybe ZonedTime} deriving (Show, Generic)
 
-instance ToJSON Post
+instance ToJSON Post where
+  toJSON = genericToJSON defaultOptions
+  toEncoding = genericToEncoding defaultOptions
 
 validateSlug :: Post -> ValidationError
 validateSlug = validate (\post -> postSlug post =~ pattern)

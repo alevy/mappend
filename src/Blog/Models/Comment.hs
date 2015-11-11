@@ -1,7 +1,6 @@
 {-# LANGUAGE TypeFamilies, DeriveGeneric, OverloadedStrings #-}
 module Blog.Models.Comment where
 
-import Control.Applicative
 import Control.Monad.IO.Class
 import Data.Aeson
 import qualified Data.ByteString as S
@@ -30,7 +29,9 @@ data Comment = Comment { commentId :: DBKey
                        , commentIsSpam :: Bool }
                   deriving (Show, Generic)
 
-instance ToJSON Comment
+instance ToJSON Comment where
+  toJSON = genericToJSON defaultOptions
+  toEncoding = genericToEncoding defaultOptions
 
 validateEmail :: Comment -> ValidationError
 validateEmail = validate (\comment -> commentEmail comment =~ pattern)
