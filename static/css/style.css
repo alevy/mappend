@@ -2,7 +2,7 @@
   font-family: 'Inika';
   font-style: normal;
   font-weight: 400;
-  src: local('Inika'), url(http://fonts.gstatic.com/s/inika/v4/r3Z5gCAKW2R-pq9oz6gfZg.woff2) format('woff2'), url(http://fonts.gstatic.com/s/inika/v4/BKu7l_qT90IBrcPZgEIfVQ.woff) format('woff');
+  src: local('Inika'), url(//fonts.gstatic.com/s/inika/v4/r3Z5gCAKW2R-pq9oz6gfZg.woff2) format('woff2'), url(//fonts.gstatic.com/s/inika/v4/BKu7l_qT90IBrcPZgEIfVQ.woff) format('woff');
 }
 @font-face {
   font-family: 'Merriweather';
