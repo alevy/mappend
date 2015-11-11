@@ -10,8 +10,14 @@
     $for(post in drafts)$
     <tr>
       <td class="title" colspan="2">$post.postTitle$</td>
+      <td class="action">
+        <a href="/admin/posts/$post.postId$/edit" title="Edit"><i class="fa fa-edit"></i></a>
       <td class="action" colspan="2">
-        <a href="/admin/posts/$post.postId$/edit">edit</a>
+        <form action="/admin/posts/$post.postId$" method="POST">
+          <input type="hidden" name="_method" value="DELETE"/>
+          <input type="hidden" name="csrf_token" value="$csrf_token$">
+          <button class="fa" type="submit" title="Remove"><i class="fa fa-remove"></i></button>
+        </form>
       </td>
     </tr>
     $endfor$
@@ -22,10 +28,16 @@
       <td class="title">$post.postTitle$</td>
       <td class="date"><time>$formatTime(post.postPostedAt, "%D")$</time></td>
       <td class="action">
-        <a href="/admin/posts/$post.postId$/edit">edit</a>
+        <a href="/admin/posts/$post.postId$/edit" title="Edit"><i class="fa fa-edit"></i></a>
       </td>
       <td class="action">
-        <a href="/admin/posts/$post.postId$/comments">comments</a>
+        <form action="/admin/posts/$post.postId$/unpublish" method="POST">
+          <input type="hidden" name="csrf_token" value="$csrf_token$">
+          <button class="fa" type="submit" title="Unpublish"><i class="fa fa-download"></i></button>
+        </form>
+      </td>
+      <td class="action">
+        <a href="/admin/posts/$post.postId$/comments" title="Comments"><i class="fa fa-comments"></i></a>
       </td>
     </tr>
     $endfor$
