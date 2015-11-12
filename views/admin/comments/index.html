@@ -8,7 +8,7 @@ $else$
   <li>
     <div class="comment">
       <div class="comment-author vcard">
-        <img src="$gravatar(comment.commentEmail, 48)$" name="$comment.commentName$"/>
+        <img src="//www.gravatar.com/avatar/$md5(comment.commentEmail)$?s=48)" name="comment.commentName"/>
         <cite class="fn">$xmlEscape(comment.commentName)$</cite>
       </div>
       <p>$xmlEscape(comment.commentComment)$</p>

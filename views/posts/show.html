@@ -14,7 +14,7 @@
     <li>
       <div class="comment" id="comment-$comment.commentId$">
         <div class="comment-author vcard">
-          <img src="$gravatar(comment.commentEmail, 48)$"/>
+          <img src="//www.gravatar.com/avatar/$md5(comment.commentEmail)$?s=48)" name="comment.commentName"/>
           <cite class="fn">$xmlEscape(comment.commentName)$</cite>
           <span class="says">says:</span>
           <time datetime="$comment.commentCommentedAt$">

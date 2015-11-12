@@ -5,13 +5,14 @@ import Prelude hiding (truncate)
 
 import Data.Aeson
 import Data.Default
+import qualified Data.Digest.Pure.MD5 as MD5
 import Data.List
 import Data.Maybe
 import Data.Text (Text, replace, unpack)
+import Data.Text.Lazy.Encoding (encodeUtf8)
 import Data.Text.Lazy (fromChunks, toStrict)
 import Data.Time.LocalTime
 import Data.Time.Format
-import Network.Gravatar
 import Text.Blaze.Html.Renderer.Text (renderHtml)
 import Text.Highlighting.Kate (formatHtmlBlock, defaultFormatOpts, highlightAs)
 import qualified Text.Markdown as Markdown
@@ -21,14 +22,13 @@ import Web.Simple.Templates
 helperFunctions :: FunctionMap
 helperFunctions = fromList
   [ ("formatTime", toFunction timeFormatter)
-  , ("gravatar", toFunction gravatarUrl)
+  , ("md5", toFunction md5)
   , ("xmlEscape", toFunction xmlEscape)
   , ("zonedToUTC", toFunction zonedToUTC)
   , ("truncate", toFunction truncate)]
 
-gravatarUrl :: Text -> Maybe Int -> Value
-gravatarUrl email size = toJSON $
-  gravatar (def {gSize = fmap Size size, gDefault = Just Wavatar}) email
+md5 :: Text -> Value
+md5 = toJSON . show . MD5.md5 . encodeUtf8 . fromChunks . (:[])
 
 timeFormatter :: ZonedTime -> Maybe String -> Value
 timeFormatter t mfmt =
