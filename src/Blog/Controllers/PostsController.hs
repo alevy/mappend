@@ -148,14 +148,21 @@ postsAdminController = requiresAdmin "/login" $ do
       (params, _) <- parseForm
       verifyCSRF params
       curTime <- liftIO $ getZonedTime
-      let pTitle = decodeUtf8 <$> lookup "title" params
-          pBody = decodeUtf8 <$> lookup "body" params
-          pSlug = (((not . T.null) `mfilter`
-                      (decodeUtf8 <$> lookup "slug" params))
-                    <|> fmap slugFromTitle pTitle)
-          postedAt = lookup "publish" params >> pure curTime
-          mpost = Post NullKey <$> pTitle <*> pSlug <*> pBody
-                  <*> fmap markdown pBody <*> pure postedAt
+      let mpost = do
+            pTitle <- decodeUtf8 <$> lookup "title" params
+            pSummary <- decodeUtf8 <$> lookup "summary" params
+            pBody <- decodeUtf8 <$> lookup "body" params
+            pSlug <- (((not . T.null) `mfilter`
+                        (decodeUtf8 <$> lookup "slug" params))
+                      <|> (Just $ slugFromTitle pTitle))
+            let postedAt = lookup "publish" params >> pure curTime
+            return $ Post { postId = NullKey
+                          , postTitle = pTitle
+                          , postSummary = pSummary
+                          , postSlug = pSlug
+                          , postBody = pBody
+                          , postBodyHtml = markdown pBody
+                          , postPostedAt = postedAt }
       case mpost of
         Just post0 -> do
           epost <- liftIO $ trySave conn post0

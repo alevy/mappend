@@ -31,6 +31,11 @@ $endif$
     </div>
     <div class="preview-content"></div>
     <div class="write-content">
+      <p$if errors.summary$ class="error"$endif$>
+        <textarea name="summary" id="summary" maxlength="140"
+          placeholder="post summary (in 140 characters or less)"
+          >$post.postSummary$</textarea>
+      </p>
       <textarea name="body" id="body" placeholder="post body...">$post.postBody$</textarea>
     </div>
   </div>
