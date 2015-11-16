@@ -17,6 +17,7 @@ import GHC.Generics
 data Post = Post { postId :: DBKey
                  , postTitle :: Text
                  , postSlug :: Text
+                 , postSummary :: Text
                  , postBody :: Text
                  , postBodyHtml :: Text
                  , postPostedAt :: Maybe ZonedTime} deriving (Show, Generic)
@@ -38,6 +39,8 @@ instance Model Post where
   modelValid =
     validateNotEmpty postTitle
       "title" "Title cannot be empty"
+    <> validateNotEmpty postTitle
+      "summary" "Summary cannot be empty"
     <> validateNotEmpty postBody
       "body"  "Body cannot be empty"
     <> validateNotEmpty postSlug

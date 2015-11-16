@@ -9,6 +9,10 @@
     <link rel="alternate" type="application/atom+xml" title="mostly typed Atom Feed" href="/feed" />
     $if(page.post.postTitle)$
     <title>mostly typed - $page.post.postTitle$</title>
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@aalevy" />
+    <meta name="twitter:description" content="$page.post.postSummary$" />
+    <meta name="twitter:title" content="$page.post.postTitle$" />
     $else$
     <title>mostly typed</title>
     $endif$
