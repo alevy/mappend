@@ -13,6 +13,7 @@ import Data.Text.Encoding
 import Data.Maybe
 import Database.PostgreSQL.Simple
 import Network.HTTP.Conduit (withManager)
+import Network.Wai.Request (appearsSecure)
 import System.Entropy
 import Web.Frank
 import Web.Simple
@@ -35,7 +36,7 @@ openIdController loginHandler = do
   get "auth/login" $ do
     claimedId <- queryParam' "openid_identifier"
     (Just host) <- requestHeader "Host"
-    secure <- isSecure <$> request
+    secure <- appearsSecure <$> request
     let completePage = decodeUtf8 $
           if secure then
             S8.concat ["https://", host, "/auth/finalize"]
