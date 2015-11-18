@@ -17,10 +17,10 @@ executable blog
   hs-source-dirs: src
   ghc-options: -O2 -Wall -fno-warn-unused-do-bind
   build-depends:
-    -- Applicative as superclass of Monad
     base >= 4.8,
-    -- Aeson toEncoding
+    -- ^ Applicative as superclass of Monad
     aeson >= 0.10,
+    -- ^ Aeson toEncoding
     authenticate,
     blaze-html,
     bytestring,
@@ -36,7 +36,8 @@ executable blog
     network,
     pureMD5,
     simple >= 0.10,
-    simple-session,
+    simple-session >= 0.10.1,
+    -- ^ secure & httponly cookie options
     simple-templates,
     simple-postgresql-orm,
     warp >= 2.0,
