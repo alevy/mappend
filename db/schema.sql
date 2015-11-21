@@ -25,9 +25,24 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 
-CREATE TABLE admins (
-    openid character varying(255) NOT NULL
+CREATE TABLE blog (
+    id integer NOT NULL,
+    username character varying(255) NOT NULL,
+    openid character varying(255)
 );
+
+
+
+CREATE SEQUENCE blog_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+
+ALTER SEQUENCE blog_id_seq OWNED BY blog.id;
 
 
 
@@ -63,7 +78,8 @@ CREATE TABLE post (
     posted_at timestamp with time zone DEFAULT now(),
     slug character varying(32) NOT NULL,
     body_html text NOT NULL,
-    summary text NOT NULL
+    summary text NOT NULL,
+    blog_id integer NOT NULL
 );
 
 
@@ -87,6 +103,10 @@ CREATE TABLE schema_migrations (
 
 
 
+ALTER TABLE ONLY blog ALTER COLUMN id SET DEFAULT nextval('blog_id_seq'::regclass);
+
+
+
 ALTER TABLE ONLY comment ALTER COLUMN id SET DEFAULT nextval('comment_id_seq'::regclass);
 
 
@@ -95,8 +115,18 @@ ALTER TABLE ONLY post ALTER COLUMN id SET DEFAULT nextval('post_id_seq'::regclas
 
 
 
-ALTER TABLE ONLY admins
-    ADD CONSTRAINT admins_pkey PRIMARY KEY (openid);
+ALTER TABLE ONLY blog
+    ADD CONSTRAINT blog_openid_key UNIQUE (openid);
+
+
+
+ALTER TABLE ONLY blog
+    ADD CONSTRAINT blog_pkey PRIMARY KEY (id);
+
+
+
+ALTER TABLE ONLY blog
+    ADD CONSTRAINT blog_username_key UNIQUE (username);
 
 
 
@@ -110,11 +140,20 @@ ALTER TABLE ONLY post
 
 
 
+CREATE UNIQUE INDEX blog_username_idx ON blog USING btree (username);
+
+
+
 CREATE UNIQUE INDEX post_stub_idx ON post USING btree (slug);
 
 
 
 ALTER TABLE ONLY comment
     ADD CONSTRAINT comment_post_id_fkey FOREIGN KEY (post_id) REFERENCES post(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY post
+    ADD CONSTRAINT post_blog_id_fkey FOREIGN KEY (blog_id) REFERENCES blog(id);
 
 
