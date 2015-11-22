@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings, MultiParamTypeClasses #-}
 module Blog.Common
-  ( AppSettings, newAppSettings, verifyCSRF, httpManager, remoteIp
+  ( AppSettings, newAppSettings, BlogSettings, verifyCSRF, httpManager, remoteIp
+  , withBlogDomain, currentBlog
   , module Web.Simple.PostgreSQL
   ) where
 
@@ -10,6 +11,7 @@ import qualified Data.ByteString as S
 import qualified Data.ByteString.Char8 as S8
 import Data.Maybe
 import Data.Monoid
+import Data.Text.Encoding (decodeUtf8)
 import Network.HTTP.Client (Manager, newManager, defaultManagerSettings)
 import Network.Socket
 import Web.Simple
@@ -17,10 +19,14 @@ import Web.Simple.PostgreSQL
 import Web.Simple.Templates
 import Web.Simple.Session
 import Blog.Helpers
+import Blog.Models.Blog (Blog, findByUsername)
 
 data AppSettings = AppSettings { appDB :: PostgreSQLConn
                                , appHttpManager :: Manager
                                , appSession :: Maybe Session }
+
+data BlogSettings = BlogSettings { blogAppSettings :: AppSettings
+                                  , blogBlog :: Blog }
 
 newAppSettings :: IO AppSettings
 newAppSettings = do
@@ -43,17 +49,55 @@ instance HasTemplates IO AppSettings where
   defaultLayout = Just <$> getTemplate "layouts/main.html"
   functionMap = return $ defaultFunctionMap <> helperFunctions
 
-verifyCSRF :: [(S.ByteString, S.ByteString)] -> Controller AppSettings ()
+instance HasPostgreSQL BlogSettings where
+  postgreSQLConn = appDB . blogAppSettings
+
+instance HasSession BlogSettings where
+  getSession = appSession . blogAppSettings
+  setSession sess = do
+    cs <- controllerState
+    putState $ cs { blogAppSettings =
+        (blogAppSettings cs) { appSession = Just sess }
+      }
+
+instance HasTemplates IO BlogSettings where
+  defaultLayout = Just <$> getTemplate "layouts/main.html"
+  functionMap = return $ defaultFunctionMap <> helperFunctions
+
+verifyCSRF :: HasSession s => [(S.ByteString, S.ByteString)] -> Controller s ()
 verifyCSRF params = do
   sessionCsrf <- sessionLookup "csrf_token"
   let formCsrf = lookup "csrf_token" params
   when (any isNothing [sessionCsrf, formCsrf] || sessionCsrf /= formCsrf) $
     respond badRequest
 
-httpManager :: Controller AppSettings Manager
-httpManager = appHttpManager <$> controllerState
+httpManager :: Controller BlogSettings Manager
+httpManager = (appHttpManager . blogAppSettings) <$> controllerState
 
-remoteIp :: Controller AppSettings S.ByteString
+currentBlog :: Controller BlogSettings Blog
+currentBlog = blogBlog <$> controllerState
+
+withBlogDomain :: Controller BlogSettings () -> Controller AppSettings ()
+withBlogDomain act = do
+  mhostname <- (return . fmap (S8.split '.'))=<< requestHeader "Host"
+  case mhostname of
+    (Just (username:_)) -> do
+      mblog <- withConnection $ \conn -> liftIO $
+        findByUsername conn $ decodeUtf8 username
+      case mblog of
+        Just blog -> do
+          st <- controllerState
+          req <- request
+          let newst = BlogSettings { blogAppSettings = st, blogBlog = blog }
+          (eres, s) <- liftIO $ runController act newst req
+          putState $ blogAppSettings s
+          case eres of
+            Left resp -> respond resp
+            Right a -> return a
+        Nothing -> return ()
+    _ -> return ()
+
+remoteIp :: Controller s S.ByteString
 remoteIp = do
   req <- request
   let hdrs = requestHeaders req

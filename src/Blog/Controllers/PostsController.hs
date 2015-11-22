@@ -26,17 +26,18 @@ import Blog.Helpers (markdown)
 import Blog.Models
 import Blog.Models.Post
 
-atomFeed :: Controller AppSettings ()
+atomFeed :: Controller BlogSettings ()
 atomFeed = withConnection $ \conn -> do
+  blog <- currentBlog
   now <- liftIO getZonedTime
   posts <- liftIO $ dbSelect conn $ addWhere_ "posted_at is not null"
                                   $ setLimit 10
                                   $ setOrderBy "posted_at desc"
-                                  $ modelDBSelect
+                                  $ getPosts blog
   renderPlain "feed.atom" $
     object ["posts" .= (posts :: [Post]), "now" .= now]
 
-postsController :: REST IO AppSettings
+postsController :: REST IO BlogSettings
 postsController = rest $ do
 
   index $ withConnection $ \conn -> do
@@ -63,7 +64,7 @@ postsController = rest $ do
             object ["post" .= p, "comments" .= comments]
         Nothing -> respond notFound
 
-postsAdminController :: Controller AppSettings ()
+postsAdminController :: Controller BlogSettings ()
 postsAdminController = requiresAdmin "/login" $ do
   post "/preview" $ do
     (params, _) <- parseForm
@@ -104,7 +105,7 @@ postsAdminController = requiresAdmin "/login" $ do
     edit $ withConnection $ \conn -> do
       pid <- readQueryParam' "id"
       (Just p) <- liftIO $
-        findRow conn pid :: Controller AppSettings (Maybe Post)
+        findRow conn pid :: Controller BlogSettings (Maybe Post)
       csrf <- sessionLookup "csrf_token"
       renderLayout "layouts/admin.html"
         "admin/posts/edit.html" $
@@ -145,6 +146,7 @@ postsAdminController = requiresAdmin "/login" $ do
         "admin/posts/new.html" $ object [ "csrf_token" .= fmap decodeUtf8 csrf ]
 
     create $ withConnection $ \conn -> do
+      blog <- currentBlog
       (params, _) <- parseForm
       verifyCSRF params
       curTime <- liftIO $ getZonedTime
@@ -157,6 +159,7 @@ postsAdminController = requiresAdmin "/login" $ do
                       <|> (Just $ slugFromTitle pTitle))
             let postedAt = lookup "publish" params >> pure curTime
             return $ Post { postId = NullKey
+                          , postBlogId = mkDBRef blog
                           , postTitle = pTitle
                           , postSummary = pSummary
                           , postSlug = pSlug

@@ -22,7 +22,7 @@ import Blog.Models.Post
 import Blog.Auth
 import Blog.Models
 
-commentsController :: Controller AppSettings ()
+commentsController :: Controller BlogSettings ()
 commentsController = do
   post "/" $ do
     pid <- readQueryParam' "post_id"
@@ -45,7 +45,7 @@ commentsController = do
             object ["comment" .= comment, "errors" .= errs
                    , "post" .= myPost, "comments" .= comments]
 
-commentsAdminController :: Controller AppSettings ()
+commentsAdminController :: Controller BlogSettings ()
 commentsAdminController = requiresAdmin "/login" $ do
   get "/" $ withConnection $ \conn -> do
     pid <- readQueryParam' "post_id"

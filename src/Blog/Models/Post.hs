@@ -1,6 +1,8 @@
-{-# LANGUAGE OverloadedStrings, TypeFamilies, MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveGeneric #-}
 module Blog.Models.Post where
+
+import Blog.Models.Blog (Blog)
 
 import Data.Aeson
 import Data.Char
@@ -15,12 +17,16 @@ import Text.Regex.TDFA.Text ()
 import GHC.Generics
 
 data Post = Post { postId :: DBKey
+                 , postBlogId :: DBRef Blog
                  , postTitle :: Text
                  , postSlug :: Text
                  , postSummary :: Text
                  , postBody :: Text
                  , postBodyHtml :: Text
                  , postPostedAt :: Maybe ZonedTime} deriving (Show, Generic)
+
+getPosts :: Blog -> DBSelect Post
+getPosts blog = assocWhere has blog
 
 instance ToJSON Post where
   toJSON = genericToJSON defaultOptions

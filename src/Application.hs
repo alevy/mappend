@@ -17,20 +17,26 @@ app runner = do
 
   runner $ methodOverridePost $
     controllerApp settings $ withSession $ do
-      openIdController handleLogin
-      routeName "login" loginPage
-      routeName "logout" logout
-      routeName "about" $ render "about.html" ()
+      routeHost "www.lvh.me:5000" $ do
+        serveStatic "static"
+        respond $ okHtml "Hello"
 
-      routeName "admin" $ do
+      withBlogDomain $ do
+        openIdController handleLogin
+
+        routeName "login" loginPage
+        routeName "logout" logout
+        routeName "about" $ render "about.html" ()
+
+        routeName "admin" $ do
+          routeName "posts" $ do
+            routePattern ":post_id/comments" $ commentsAdminController
+            postsAdminController
+          routeTop $ respond $ redirectTo "/admin/posts/"
         routeName "posts" $ do
-          routePattern ":post_id/comments" $ commentsAdminController
-          postsAdminController
-        routeTop $ respond $ redirectTo "/admin/posts/"
-      routeName "posts" $ do
-        routePattern ":post_id/comments" $ commentsController
-        routeREST $ postsController
-      routeName "feed" atomFeed
-      routeTop $ restIndex $ postsController
-      serveStatic "static"
+          routePattern ":post_id/comments" $ commentsController
+          routeREST $ postsController
+        routeName "feed" atomFeed
+        routeTop $ restIndex $ postsController
+        serveStatic "static"
 

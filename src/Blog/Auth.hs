@@ -44,7 +44,7 @@ openIdController loginHandler = do
                     completePage Nothing []
     respond $ redirectTo $ encodeUtf8 fu
 
-handleLogin :: T.Text -> Controller AppSettings ()
+handleLogin :: T.Text -> Controller BlogSettings ()
 handleLogin openid = do
   res <- withConnection $ \conn -> liftIO $
     query_ conn "select openid from admins"
@@ -57,13 +57,13 @@ handleLogin openid = do
   sessionInsert "csrf_token" $ csrfToken
   respond $ redirectTo ret
 
-logout :: Controller AppSettings ()
+logout :: Controller BlogSettings ()
 logout = do
   sessionDelete "user"
   respond $ redirectTo "/"
 
 requiresAdmin :: S8.ByteString
-              -> Controller AppSettings b -> Controller AppSettings b
+              -> Controller BlogSettings b -> Controller BlogSettings b
 requiresAdmin loginUrl cnt = do
   muser <- sessionLookup "user"
   if isJust muser then
@@ -73,6 +73,6 @@ requiresAdmin loginUrl cnt = do
       sessionInsert "return_to" $ rawPathInfo req
       respond $ redirectTo loginUrl
 
-loginPage :: Controller AppSettings ()
+loginPage :: Controller BlogSettings ()
 loginPage = renderLayout "layouts/login.html" "login.html" Null
 
