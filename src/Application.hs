@@ -29,10 +29,10 @@ app runner = do
         routeName "about" $ render "about.html" ()
 
         routeName "admin" $ do
+          routeTop $ respond $ redirectTo "/admin/posts/new"
           routeName "posts" $ do
             routePattern ":post_id/comments" $ commentsAdminController
             postsAdminController
-          routeTop $ respond $ redirectTo "/admin/posts/"
         routeName "posts" $ do
           routePattern ":post_id/comments" $ commentsController
           routeREST $ postsController
