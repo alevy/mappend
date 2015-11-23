@@ -83,5 +83,5 @@ requiresAdmin loginUrl cnt = do
       respond $ redirectTo loginUrl
 
 loginPage :: Controller BlogSettings ()
-loginPage = renderLayout "layouts/login.html" "login.html" Null
+loginPage = renderPlain "login.html" Null
 
