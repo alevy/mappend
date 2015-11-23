@@ -37,3 +37,7 @@ findByUsername :: Connection -> Text -> IO (Maybe Blog)
 findByUsername conn username = fmap listToMaybe $
   dbSelect conn $ addWhere "username = ?" [username] $ modelDBSelect
 
+findByOpenid :: Connection -> Text -> IO (Maybe Blog)
+findByOpenid conn openid = fmap listToMaybe $
+  dbSelect conn $ addWhere "openid = ?" [openid] $ modelDBSelect
+
