@@ -1,6 +1,4 @@
-<header>
-  <h2>New Post</h2>
-</header>
+<h2>New Post</h2>
 $if(errors)$
 <div id="errors">
   <h1>There were errors updating the post</h1>
@@ -11,16 +9,15 @@ $endfor$$endfor$
   </ul>
 </div>
 $endif$
-<form class="content" action="/admin/posts"
-  method="post" acceptCharset="UTF-8">
+<form action="/admin/posts" method="post" acceptCharset="UTF-8">
   <input type="hidden" name="csrf_token" value="$csrf_token$">
   <p$if errors.title$ class="error"$endif$>
     <input type="text" name="title" id="title" placeholder="title"
     value="$post.postTitle$"/></p>
-  <p$if errors.slug$ class="error"$endif$>
-    <input type="text" name="slug" id="slug"
-    placeholder="slug (leave blank to autogenerate from title)"
-    value="$post.postSlug$"/>
+  <p$if errors.summary$ class="error"$endif$>
+    <textarea name="summary" id="summary" maxlength="140"
+      placeholder="post summary (in 140 characters or less)"
+      >$post.postSummary$</textarea>
   </p>
   <div class="bubble$if errors.body$ error$endif$">
     <div class="tabs">
@@ -31,11 +28,6 @@ $endif$
     </div>
     <div class="preview-content"></div>
     <div class="write-content">
-      <p$if errors.summary$ class="error"$endif$>
-        <textarea name="summary" id="summary" maxlength="140"
-          placeholder="post summary (in 140 characters or less)"
-          >$post.postSummary$</textarea>
-      </p>
       <textarea name="body" id="body" placeholder="post body...">$post.postBody$</textarea>
     </div>
   </div>

@@ -74,23 +74,6 @@ postsAdminController = requiresAdmin "/login" $ do
       Just pBody -> respond $
                     okJson $ encode $ object ["body" .= markdown pBody]
 
-  post ":id/unpublish" $ withConnection $ \conn -> do
-    pid <- readQueryParam' "id"
-    (params, _) <- parseForm
-    verifyCSRF params
-    mpost <- liftIO $ findRow conn pid
-    case mpost of
-      Just post0 -> do
-        epost <- liftIO $ trySave conn $ post0 { postPostedAt = Nothing }
-        case epost of
-          Left errs -> do
-            csrf <- sessionLookup "csrf_token"
-            renderLayout "layouts/admin.html" "admin/posts/edit.html" $
-              object [ "errors" .= errs, "post" .= post0
-                     , "csrf_token" .= fmap decodeUtf8 csrf ]
-          Right _ -> redirectBack
-      Nothing -> redirectBack
-
   routeREST $ rest $ do
     index $ withConnection $ \conn -> do
       posts <- liftIO $ dbSelect conn $
@@ -116,7 +99,14 @@ postsAdminController = requiresAdmin "/login" $ do
       (Just p) <- liftIO $ findRow conn pid
       (params, _) <- parseForm
       verifyCSRF params
+
+      -- If submitted with unpublish, unpublish
+      when (lookup "unpublish" params /= Nothing) $ do
+        liftIO $ save conn $ p { postPostedAt = Nothing }
+        respond $ redirectTo "/admin/posts"
+
       curTime <- liftIO $ getZonedTime
+
       let mpost = do
             pTitle <- (decodeUtf8 <$> lookup "title" params) <|>
                         (pure $ postTitle p)

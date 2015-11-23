@@ -1,45 +1,46 @@
-<h2>Posts</h2>
-<div class="content">
-  <table class="admin-posts-list">
-    <tr>
-      <th>Title</th>
-      <th>Posted</th>
-      <th colspan="2"></th>
-    </tr>
-    <tr><td colspan="4"><strong>Drafts</strong></td></tr>
-    $for(post in drafts)$
-    <tr>
-      <td class="title" colspan="2">$post.postTitle$</td>
-      <td class="action">
-        <a href="/admin/posts/$post.postId$/edit" title="Edit"><i class="fa fa-edit"></i></a>
-      <td class="action" colspan="2">
-        <form action="/admin/posts/$post.postId$" method="POST">
+<div class="drafts">
+  <h2>Drafts</h2>
+  <ul>
+$for(post in drafts)$
+    <li>
+      <span>
+        <a href="/admin/posts/$post.postId$/edit" title="Edit">
+          <i class="fa fa-edit"></i>
+        </a>
+        <form class="widget" action="/admin/posts/$post.postId$" method="POST">
           <input type="hidden" name="_method" value="DELETE"/>
           <input type="hidden" name="csrf_token" value="$csrf_token$">
-          <button class="fa" type="submit" title="Remove"><i class="fa fa-remove"></i></button>
+          <button class="fa" type="submit" title="Delete"><i class="fa fa-remove"></i></button>
         </form>
-      </td>
-    </tr>
-    $endfor$
-    <tr><td colspan="4">&nbsp;</td></tr>
-    <tr><td colspan="4"><strong>Published</strong></td></tr>
-    $for(post in published)$
-    <tr>
-      <td class="title">$post.postTitle$</td>
-      <td class="date"><time>$formatTime(post.postPostedAt, "%D")$</time></td>
-      <td class="action">
-        <a href="/admin/posts/$post.postId$/edit" title="Edit"><i class="fa fa-edit"></i></a>
-      </td>
-      <td class="action">
-        <form action="/admin/posts/$post.postId$/unpublish" method="POST">
-          <input type="hidden" name="csrf_token" value="$csrf_token$">
-          <button class="fa" type="submit" title="Unpublish"><i class="fa fa-download"></i></button>
-        </form>
-      </td>
-      <td class="action">
-        <a href="/admin/posts/$post.postId$/comments" title="Comments"><i class="fa fa-comments"></i></a>
-      </td>
-    </tr>
-    $endfor$
-  </table>
+      </span>
+      <a href="/admin/posts/$post.postId$/edit" title="Edit">
+        $post.postTitle$
+      </a>
+    </li>
+$endfor$
+  </ul>
 </div>
+
+<div class="posts">
+  <h2>Posts</h2>
+  <ul>
+$for(post in published)$
+    <li>
+      <span>
+        <a href="/admin/posts/$post.postId$/edit" title="Edit">
+          <i class="fa fa-edit"></i>
+        </a>
+        <a href="/posts/$post.postSlug$" title="View">
+          <i class="fa fa-eye"></i>
+        </a>
+        <a href="/admin/posts/$post.postId$/comments" title="Comments">
+          <i class="fa fa-comments"></i></a>
+      </span>
+      <a href="/admin/posts/$post.postId$/edit" title="Edit">
+        $post.postTitle$
+      </a>
+    </li>
+$endfor$
+  </ul>
+</div>
+
