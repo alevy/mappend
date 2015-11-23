@@ -61,7 +61,7 @@ instance HasSession BlogSettings where
       }
 
 instance HasTemplates IO BlogSettings where
-  defaultLayout = Just <$> getTemplate "layouts/main.html"
+  defaultLayout = Just <$> getTemplate "layouts/blog.html"
   functionMap = return $ defaultFunctionMap <> helperFunctions
 
 verifyCSRF :: HasSession s => [(S.ByteString, S.ByteString)] -> Controller s ()

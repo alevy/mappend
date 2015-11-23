@@ -4,26 +4,32 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <link rel="shortcut icon" href="/favicon.ico" />
     <link rel="stylesheet" type="text/css" href="/css/font-awesome.css">
-    <link rel="stylesheet" type="text/css" href="/css/style.css">
-    <title>mostly typed</title>
+    <link rel="stylesheet" type="text/css" href="/css/admin.css">
+    <title>My Blog</title>
 </head>
 <body>
-  <div id="wrapper">
   <header>
-    <h1><a href="/">mostly typed</a></h1>
+    <h1><a href="/">My Blog</a></h1>
     <nav>
       <ul>
-        <li><a href="/admin/posts">posts</a></li>
-        <li><a href="/admin/posts/new">new post</a></li>
+        <li><a href="/admin/posts/new" title="New Post">
+          <i class="fa fa-pencil-square"></i>
+        </a></li>
+        <li><a href="/admin/posts" title="Posts">
+          <i class="fa fa-book"></i>
+        </a></li>
+        <li><a href="#" title="Profile">
+          <i class="fa fa-user"></i>
+        </a></li>
+        <li><a href="/logout" title="Logout">
+          <i class="fa fa-sign-out"></i>
+        </a></li>
       </ul>
+      <div style="clear: all"></div>
     </nav>
   </header>
-  <section id="admin">
+  <div id="wrapper">
 $yield$
-  </section>
-  <footer>
-    <a href="/logout">logout</a>
-  </footer>
   </div>
   <script src="/js/jquery-1.10.2.js"></script>
   <script src="/js/application.js"></script>

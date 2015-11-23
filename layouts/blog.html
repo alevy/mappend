@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="shortcut icon" href="/favicon.ico" />
     <link rel="stylesheet" type="text/css" href="/css/font-awesome.min.css">
-    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <link rel="stylesheet" type="text/css" href="/css/blog.css">
     <link rel="alternate" type="application/atom+xml" title="mostly typed Atom Feed" href="/feed" />
     $if(page.post.postTitle)$
     <title>mostly typed - $page.post.postTitle$</title>
@@ -32,6 +32,9 @@
         </a>
       </li>
     </nav>
+    <span id="signin">
+      <a href="/admin" title="Admin"><i class="fa fa-sign-in"></i></a>
+    </span>
   </header>
   <section>
 $yield$
