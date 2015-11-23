@@ -66,7 +66,7 @@ handleLogin openid = do
 
 logout :: Controller BlogSettings ()
 logout = do
-  sessionDelete "user"
+  sessionDelete "blogger_id"
   respond $ redirectTo "/"
 
 requiresAdmin :: S8.ByteString
