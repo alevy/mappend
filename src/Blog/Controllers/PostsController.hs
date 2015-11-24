@@ -41,22 +41,24 @@ postsController :: REST IO BlogSettings
 postsController = rest $ do
 
   index $ withConnection $ \conn -> do
+    blog <- currentBlog
     mpage <- readQueryParam "offset"
     let page = maybe 0 id mpage
     posts <- liftIO $ dbSelect conn $ addWhere_ "posted_at is not null"
                                     $ setLimit 10
                                     $ setOffset (page * 10)
                                     $ setOrderBy "posted_at desc"
-                                    $ modelDBSelect
+                                    $ getPosts blog
     render "posts/index.html" (posts :: [Post])
 
   show $ do
+    blog <- currentBlog
     withConnection $ \conn -> do
       slug <- queryParam' "id"
       mpost <- liftIO $ listToMaybe <$>
         (dbSelect conn $
           addWhere "slug = ?" [slug :: S8.ByteString] $
-          modelDBSelect)
+          getPosts blog)
       case mpost of
         Just p -> do
           comments <- liftIO $ allComments conn p
@@ -76,8 +78,9 @@ postsAdminController = requiresAdmin "/login" $ do
 
   routeREST $ rest $ do
     index $ withConnection $ \conn -> do
+      blog <- currentBlog
       posts <- liftIO $ dbSelect conn $
-        setOrderBy "posted_at desc" $ modelDBSelect
+        setOrderBy "posted_at desc" $ getPosts blog
       let (published, drafts) = partition (isJust . postPostedAt) posts
       csrf <- sessionLookup "csrf_token"
       renderLayout "layouts/admin.html"
@@ -87,16 +90,21 @@ postsAdminController = requiresAdmin "/login" $ do
 
     edit $ withConnection $ \conn -> do
       pid <- readQueryParam' "id"
-      (Just p) <- liftIO $
-        findRow conn pid :: Controller BlogSettings (Maybe Post)
-      csrf <- sessionLookup "csrf_token"
-      renderLayout "layouts/admin.html"
-        "admin/posts/edit.html" $
-          object ["post" .= p, "csrf_token" .= fmap decodeUtf8 csrf]
+      blog <- currentBlog
+      mpost <- liftIO $
+        findPost conn blog pid
+      case mpost of
+        Just pst -> do
+          csrf <- sessionLookup "csrf_token"
+          renderLayout "layouts/admin.html"
+            "admin/posts/edit.html" $
+              object ["post" .= pst, "csrf_token" .= fmap decodeUtf8 csrf]
+        Nothing -> respond notFound
 
     update $ withConnection $ \conn -> do
       pid <- readQueryParam' "id"
-      (Just p) <- liftIO $ findRow conn pid
+      blog <- currentBlog
+      (Just p) <- liftIO $ findPost conn blog pid
       (params, _) <- parseForm
       verifyCSRF params
 
@@ -172,7 +180,11 @@ postsAdminController = requiresAdmin "/login" $ do
       pid <- readQueryParam' "id"
       (params, _) <- parseForm
       verifyCSRF params
-      (Just p) <- liftIO $ findRow conn pid
-      liftIO $ destroy conn (p :: Post)
-      respond $ redirectTo "/admin/posts"
+      blog <- currentBlog
+      mpost <- liftIO $ findPost conn blog pid
+      case mpost of
+        Just p -> do
+          liftIO $ destroy conn p
+          respond $ redirectTo "/admin/posts"
+        Nothing -> respond notFound
 
