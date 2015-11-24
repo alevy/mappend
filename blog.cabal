@@ -35,7 +35,7 @@ executable blog
     markdown,
     network,
     pureMD5,
-    simple >= 0.10,
+    simple >= 0.11,
     simple-session,
     simple-templates,
     simple-postgresql-orm,
