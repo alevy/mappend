@@ -7,8 +7,10 @@ module Blog.Common
 
 import Control.Monad
 import Control.Monad.IO.Class
+import Data.Aeson (Value(Object), toJSON)
 import qualified Data.ByteString as S
 import qualified Data.ByteString.Char8 as S8
+import qualified Data.HashMap.Strict as H
 import Data.Maybe
 import Data.Monoid
 import Data.Text.Encoding (decodeUtf8)
@@ -63,6 +65,10 @@ instance HasSession BlogSettings where
 instance HasTemplates IO BlogSettings where
   defaultLayout = Just <$> getTemplate "layouts/blog.html"
   functionMap = return $ defaultFunctionMap <> helperFunctions
+  layoutObject pageContent pageValue = do
+    (Object obj) <- defaultLayoutObject pageContent pageValue
+    blog <- currentBlog
+    return $ Object $ H.insert "blog" (toJSON blog) obj
 
 verifyCSRF :: HasSession s => [(S.ByteString, S.ByteString)] -> Controller s ()
 verifyCSRF params = do

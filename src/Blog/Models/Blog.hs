@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveGeneric, OverloadedStrings #-}
 module Blog.Models.Blog where
 
+import Data.Aeson (ToJSON(..), object, (.=))
 import Data.Text (Text)
 import Data.Monoid ((<>))
 import Data.Maybe (listToMaybe)
@@ -16,6 +17,7 @@ import GHC.Generics
 
 data Blog = Blog { blogId :: DBKey
                  , blogUsername :: Text
+                 , blogTitle :: Text
                  , blogOpenid :: Text } deriving (Show, Generic)
 
 validateUsername :: Blog -> ValidationError
@@ -32,6 +34,10 @@ instance Model Blog where
     validateNotEmpty blogUsername
       "username" "Username cannot be empty"
     <> validateUsername
+
+instance ToJSON Blog where
+    toJSON blog =
+      object ["title" .= blogTitle blog, "username" .= blogUsername blog]
 
 findByUsername :: Connection -> Text -> IO (Maybe Blog)
 findByUsername conn username = fmap listToMaybe $

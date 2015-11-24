@@ -47,5 +47,6 @@ executable blog
     postgresql-orm,
     regex-tdfa,
     regex-tdfa-text,
-    transformers
+    transformers,
+    unordered-containers
 

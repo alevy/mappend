@@ -28,7 +28,8 @@ SET default_with_oids = false;
 CREATE TABLE blog (
     id integer NOT NULL,
     username character varying(255) NOT NULL,
-    openid character varying(255)
+    openid character varying(255),
+    title character varying(255) NOT NULL
 );
 
 
