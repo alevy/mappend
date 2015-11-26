@@ -18,6 +18,14 @@ CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 
 
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
+
+
+
+COMMENT ON EXTENSION pgcrypto IS 'cryptographic functions';
+
+
 SET search_path = public, pg_catalog;
 
 SET default_tablespace = '';
@@ -29,7 +37,8 @@ CREATE TABLE blog (
     id integer NOT NULL,
     username character varying(255) NOT NULL,
     openid character varying(255),
-    title character varying(255) NOT NULL
+    title character varying(255) NOT NULL,
+    password_digest text DEFAULT crypt(md5((random())::text), gen_salt('bf'::text)) NOT NULL
 );
 
 
