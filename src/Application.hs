@@ -5,6 +5,7 @@ import Blog.Auth
 import Blog.Common
 import Blog.Controllers.CommentsController
 import Blog.Controllers.PostsController
+import Blog.Controllers.PreferencesController
 import Network.Wai.Middleware.MethodOverridePost
 import Web.Simple
 import Web.Simple.Session
@@ -33,6 +34,7 @@ app runner = do
           routeName "posts" $ do
             routePattern ":post_id/comments" $ commentsAdminController
             postsAdminController
+          routeName "preferences" $ preferencesController
         routeName "posts" $ do
           routePattern ":post_id/comments" $ commentsController
           routeREST $ postsController

@@ -2,17 +2,40 @@
 <html>
   <head>
     <link rel="shortcut icon" href="/favicon.ico" />
-    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <link rel="stylesheet" type="text/css" href="/css/admin.css">
     <title>mostly typed</title>
 </head>
 <body>
   <div id="login">
     <div class="login_form">
-      <header><h1>Login with OpenId</h1></header>
+      <header><h1>Login with Password</h1></header>
+$if(error)$
+      <div id="errors">
+        <h1>There was an error logging into your blog</h1>
+        <ul>
+          <li>$error$</li>
+        </ul>
+      </div>
+$endif$
+      <form action="/login" method="POST">
+        <p>
+          <input type="text" name="username"
+           placeholder="username" autofocus/>
+        </p>
+        <p>
+          <input type="password" name="password"
+           placeholder="password" />
+        </p>
+        <p>
+          <input type="submit" value="Login"/>
+        </p>
+      </form>
+      <p>-or-</p>
+      <header><h3>Login with OpenId</h3></header>
       <form action="/auth/login" method="GET">
         <p>
           <input type="text" name="openid_identifier"
-           placeholder="http://" autofocus/>
+           placeholder="http://" />
         </p>
         <p>
           <input type="submit" value="Login"/>

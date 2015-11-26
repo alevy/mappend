@@ -97,7 +97,7 @@ textarea {
   resize: vertical;
 }
 
-input[type="text"], input[type="email"], textarea {
+input[type="text"], input[type="email"], input[type="password"], textarea {
   line-height: 1.5em;
   background-color: white;
   padding: 1%;
@@ -232,5 +232,44 @@ input#title {
 
 #errors, .error {
   margin-bottom: 1em;
+}
+
+#login {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #eee;
+}
+
+.login_form {
+  width: 400px;
+  margin: 90px auto;
+  border: 10px solid #ddd;
+  padding: 20px;
+  background-color: #fff;
+}
+
+.login_form form {
+  width: 100%;
+}
+
+.login_form input {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.login_form input[type="text"], .login_form input[type="password"] {
+  width: 85%;
+  line-height: 1.5em;
+  font-size: 16pt;
+}
+
+.login_form input[name="openid_identifier"] {
+  background: url(/images/openid-16x16.gif) no-repeat scroll 5px center;
+  padding-left: 25px;
+  line-height: 1em;
+  font-size: 14pt;
 }
 

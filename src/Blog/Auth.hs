@@ -21,7 +21,7 @@ import Web.Simple.Templates
 import Web.Authenticate.OpenId
 
 import Blog.Common
-import Blog.Models.Blog (blogId, findByOpenid)
+import Blog.Models.Blog (blogId, findByOpenid, blogLogin)
 
 openIdController :: (T.Text -> Controller a ()) -> Controller a ()
 openIdController loginHandler = do
@@ -76,12 +76,29 @@ requiresAdmin loginUrl cnt = do
   curBlog <- currentBlog
   case mbid of
     Just bid | (DBKey $ read . S8.unpack $ bid) == blogId curBlog -> cnt
-             | True -> respond $ forbidden
-    Nothing -> do
+    _ -> do
       req <- request
       sessionInsert "return_to" $ rawPathInfo req
       respond $ redirectTo loginUrl
 
 loginPage :: Controller BlogSettings ()
-loginPage = renderPlain "login.html" Null
+loginPage = do
+  get "/" $ renderPlain "login.html" Null
+
+  post "/" $ do
+    params <- fst <$> parseForm
+    let username = decodeUtf8 <$> fromMaybe "" $ lookup "username" params
+        password = decodeUtf8 <$> fromMaybe "" $ lookup "password" params
+    muser <- withConnection $ \conn -> liftIO $ blogLogin conn username password
+    case muser of
+      Nothing -> do
+        renderPlain "login.html" $ object
+          [ "error" .= ("Incorrect username/password" :: T.Text)]
+      Just  blog -> do
+        sessionInsert "blogger_id" $ S8.pack $ show $ blogId blog
+        ret <- fromMaybe "/" `fmap` sessionLookup "return_to"
+        sessionDelete "return_to"
+        csrfToken <- liftIO $ hex <$> getEntropy 32
+        sessionInsert "csrf_token" $ csrfToken
+        respond $ redirectTo ret
 

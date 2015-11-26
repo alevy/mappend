@@ -208,11 +208,6 @@ ol#comments > li {
   padding-left: 0.5em;
 }
 
-.login_form input {
-  display: block;
-  margin-bottom: 10px;
-}
-
 #errors {
   border: 2px solid #e00;
   border-radius: 3px;
@@ -349,35 +344,6 @@ ol#comments {
 
 ol#comments li {
   list-style-type: none;
-}
-
-#login {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background-color: #eee;
-}
-
-.login_form {
-  width: 400px;
-  margin: 90px auto;
-  border: 10px solid #ddd;
-  padding: 20px;
-  background-color: #fff;
-}
-
-.login_form form {
-  width: 100%;
-}
-
-.login_form input[name="openid_identifier"] {
-  width: 85%;
-  background: url(/images/openid-16x16.gif) no-repeat scroll 5px center;
-  padding-left: 25px;
-  line-height: 1.5em;
-  font-size: 16pt;
 }
 
 button.fa {
