@@ -1,0 +1,26 @@
+<header><h2>Comments: <em>$post.postTitle$</em></h2></header>
+<div class="content">
+$if(null(comments))$
+<p><em>No comments</em></p>
+$else$
+  <ol id="comments">
+  $for(comment in comments)$
+  <li>
+    <div class="comment">
+      <div class="comment-author vcard">
+        <img src="//www.gravatar.com/avatar/$md5(comment.commentEmail)$?s=48)" name="comment.commentName"/>
+        <cite class="fn">$xmlEscape(comment.commentName)$</cite>
+      </div>
+      <p>$xmlEscape(comment.commentComment)$</p>
+    </div>
+    <form action="/dashboard/posts/$post.postId$/comments/$comment.commentId$"
+      method="POST">
+      <input type="hidden" name="_method" value="DELETE"/>
+      <input type="hidden" name="csrf_token" value="$csrf_token$"/>
+      <p><input type="submit" value="Delete"></p>
+    </form>
+  </li>
+  $endfor$
+  </ol>
+$endif$
+</div>

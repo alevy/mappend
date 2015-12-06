@@ -1,11 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Application where
 
-import Blog.Auth
+import Data.Monoid ((<>))
 import Blog.Common
 import Blog.Controllers.CommentsController
+import Blog.Controllers.MainController
 import Blog.Controllers.PostsController
-import Blog.Controllers.PreferencesController
 import Network.Wai.Middleware.MethodOverridePost
 import Web.Simple
 import Web.Simple.Session
@@ -18,27 +18,25 @@ app runner = do
 
   runner $ methodOverridePost $
     controllerApp settings $ withSession $ do
-      routeHost "www.lvh.me:5000" $ do
-        serveStatic "static"
-        respond $ okHtml "Hello"
+      mainDomain <- baseDomain
+
+      routeAny [routeHost mainDomain, routeHost $ "www." <> mainDomain] $
+        mainController
 
       withBlogDomain $ do
-        openIdController handleLogin
-
-        routeName "login" loginPage
-        routeName "logout" logout
         routeName "about" $ render "about.html" ()
 
-        routeName "admin" $ do
-          routeTop $ respond $ redirectTo "/admin/posts/new"
-          routeName "posts" $ do
-            routePattern ":post_id/comments" $ commentsAdminController
-            postsAdminController
-          routeName "preferences" $ preferencesController
         routeName "posts" $ do
           routePattern ":post_id/comments" $ commentsController
           routeREST $ postsController
         routeName "feed" atomFeed
         routeTop $ restIndex $ postsController
         serveStatic "static"
+        respond notFound
+
+      secure <- isSecure <$> request
+      respond $ redirectTo $
+        if secure then
+          "https://" <> mainDomain
+          else "http://" <> mainDomain
 

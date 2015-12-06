@@ -1,0 +1,39 @@
+<div class="drafts">
+  <h2>Drafts</h2>
+  <ul>
+$for(post in drafts)$
+    <li>
+      <span>
+        <a href="/dashboard/posts/$post.postId$/edit" title="Edit">
+          <i class="fa fa-edit"></i>
+        </a>
+        <form class="widget" action="/dashboard/posts/$post.postId$" method="POST">
+          <input type="hidden" name="_method" value="DELETE"/>
+          <input type="hidden" name="csrf_token" value="$csrf_token$">
+          <button class="fa" type="submit" title="Delete"><i class="fa fa-remove"></i></button>
+        </form>
+      </span>
+      $post.postTitle$
+    </li>
+$endfor$
+  </ul>
+</div>
+
+<div class="posts">
+  <h2>Posts</h2>
+  <ul>
+$for(post in published)$
+    <li>
+      <span>
+        <a href="/dashboard/posts/$post.postId$/edit" title="Edit">
+          <i class="fa fa-edit"></i>
+        </a>
+        <a href="/dashboard/posts/$post.postId$/comments" title="Comments">
+          <i class="fa fa-comments"></i></a>
+      </span>
+      $post.postTitle$
+    </li>
+$endfor$
+  </ul>
+</div>
+

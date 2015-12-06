@@ -51,7 +51,7 @@ openIdController loginHandler = do
                     completePage Nothing []
     respond $ redirectTo $ encodeUtf8 fu
 
-handleLogin :: T.Text -> Controller BlogSettings ()
+handleLogin :: T.Text -> Controller AdminSettings ()
 handleLogin openid = do
   mblog <- withConnection $ \conn -> liftIO $
     findByOpenid conn openid
@@ -64,13 +64,13 @@ handleLogin openid = do
   sessionInsert "csrf_token" $ csrfToken
   respond $ redirectTo ret
 
-logout :: Controller BlogSettings ()
+logout :: Controller AdminSettings ()
 logout = do
   sessionDelete "blogger_id"
   respond $ redirectTo "/"
 
 requiresAdmin :: S8.ByteString
-              -> Controller BlogSettings b -> Controller BlogSettings b
+              -> Controller AdminSettings b -> Controller AdminSettings b
 requiresAdmin loginUrl cnt = do
   mbid <- sessionLookup "blogger_id"
   curBlog <- currentBlog
@@ -81,9 +81,9 @@ requiresAdmin loginUrl cnt = do
       sessionInsert "return_to" $ rawPathInfo req
       respond $ redirectTo loginUrl
 
-loginPage :: Controller BlogSettings ()
+loginPage :: Controller AppSettings ()
 loginPage = do
-  get "/" $ renderPlain "login.html" Null
+  get "/" $ render "main/login.html" ()
 
   post "/" $ do
     params <- fst <$> parseForm
@@ -92,11 +92,11 @@ loginPage = do
     muser <- withConnection $ \conn -> liftIO $ blogLogin conn username password
     case muser of
       Nothing -> do
-        renderPlain "login.html" $ object
+        render "main/login.html" $ object
           [ "error" .= ("Incorrect username/password" :: T.Text)]
       Just  blog -> do
         sessionInsert "blogger_id" $ S8.pack $ show $ blogId blog
-        ret <- fromMaybe "/" `fmap` sessionLookup "return_to"
+        ret <- fromMaybe "/dashboard" `fmap` sessionLookup "return_to"
         sessionDelete "return_to"
         csrfToken <- liftIO $ hex <$> getEntropy 32
         sessionInsert "csrf_token" $ csrfToken

@@ -1,7 +1,9 @@
 {-# LANGUAGE OverloadedStrings, MultiParamTypeClasses #-}
 module Blog.Common
-  ( AppSettings, newAppSettings, BlogSettings, verifyCSRF, httpManager, remoteIp
-  , withBlogDomain, currentBlog
+  ( AppSettings, newAppSettings, BlogSettings, AdminSettings
+  , verifyCSRF, httpManager, remoteIp
+  , baseDomain, withBlogDomain, currentBlog, dashboard
+  , routeAny
   , module Web.Simple.PostgreSQL
   ) where
 
@@ -22,20 +24,27 @@ import Web.Simple.Templates
 import Web.Simple.Session
 import Blog.Helpers
 import Blog.Models.Blog (Blog, findByUsername)
+import System.Environment (getEnv)
 
 data AppSettings = AppSettings { appDB :: PostgreSQLConn
                                , appHttpManager :: Manager
+                               , appBaseDomain :: S8.ByteString
                                , appSession :: Maybe Session }
 
 data BlogSettings = BlogSettings { blogAppSettings :: AppSettings
                                   , blogBlog :: Blog }
 
+data AdminSettings = AdminSettings { adminAppSettings :: AppSettings
+                                   , adminBlog :: Blog }
+
 newAppSettings :: IO AppSettings
 newAppSettings = do
+  envBaseDomain <- S8.pack <$> getEnv "BASE_DOMAIN"
   db <- createPostgreSQLConn
   mgr <- newManager defaultManagerSettings
   return $ AppSettings { appDB = db
                        , appSession = Nothing
+                       , appBaseDomain = envBaseDomain
                        , appHttpManager = mgr }
 
 instance HasPostgreSQL AppSettings where
@@ -50,6 +59,9 @@ instance HasSession AppSettings where
 instance HasTemplates IO AppSettings where
   defaultLayout = Just <$> getTemplate "layouts/main.html"
   functionMap = return $ defaultFunctionMap <> helperFunctions
+
+baseDomain :: Controller AppSettings S8.ByteString
+baseDomain = appBaseDomain <$> controllerState
 
 instance HasPostgreSQL BlogSettings where
   postgreSQLConn = appDB . blogAppSettings
@@ -70,6 +82,34 @@ instance HasTemplates IO BlogSettings where
     blog <- currentBlog
     return $ Object $ H.insert "blog" (toJSON blog) obj
 
+instance HasPostgreSQL AdminSettings where
+  postgreSQLConn = appDB . adminAppSettings
+
+instance HasSession AdminSettings where
+  getSession = appSession . adminAppSettings
+  setSession sess = do
+    cs <- controllerState
+    putState $ cs { adminAppSettings =
+        (adminAppSettings cs) { appSession = Just sess }
+      }
+
+instance HasTemplates IO AdminSettings where
+  defaultLayout = Just <$> getTemplate "layouts/admin.html"
+  functionMap = return $ defaultFunctionMap <> helperFunctions
+  layoutObject pageContent pageValue = do
+    (Object obj) <- defaultLayoutObject pageContent pageValue
+    blog <- currentBlog
+    return $ Object $ H.insert "blog" (toJSON blog) obj
+
+class HasBlog s where
+  currentBlog :: Controller s Blog
+
+instance HasBlog BlogSettings where
+  currentBlog = blogBlog <$> controllerState
+
+instance HasBlog AdminSettings where
+  currentBlog = adminBlog <$> controllerState
+
 verifyCSRF :: HasSession s => [(S.ByteString, S.ByteString)] -> Controller s ()
 verifyCSRF params = do
   sessionCsrf <- sessionLookup "csrf_token"
@@ -79,9 +119,6 @@ verifyCSRF params = do
 
 httpManager :: Controller BlogSettings Manager
 httpManager = (appHttpManager . blogAppSettings) <$> controllerState
-
-currentBlog :: Controller BlogSettings Blog
-currentBlog = blogBlog <$> controllerState
 
 withBlogDomain :: Controller BlogSettings () -> Controller AppSettings ()
 withBlogDomain act = do
@@ -103,6 +140,26 @@ withBlogDomain act = do
         Nothing -> return ()
     _ -> return ()
 
+dashboard :: Controller AdminSettings () -> Controller AppSettings ()
+dashboard act = do
+  mbloggerId <- sessionLookup "blogger_id"
+  case mbloggerId of
+    Just blogId -> do
+      mblog <- withConnection $ \conn -> liftIO $
+        findRow conn $ read $ S8.unpack $ blogId
+      case mblog of
+        Just blog -> do
+          st <- controllerState
+          req <- request
+          let newst = AdminSettings { adminAppSettings = st, adminBlog = blog }
+          (eres, s) <- liftIO $ runController act newst req
+          putState $ adminAppSettings s
+          case eres of
+            Left resp -> respond resp
+            Right a -> return a
+        Nothing -> return ()
+    _ -> return ()
+
 remoteIp :: Controller s S.ByteString
 remoteIp = do
   req <- request
@@ -115,4 +172,9 @@ remoteIp = do
   return $ case mrip of
     Just ip -> ip
     Nothing -> S8.pack <$> fromMaybe "no-client-address" $ fst nonProxyIp
+
+routeAny :: [Controller s () -> Controller s ()] -> Controller s ()
+         -> Controller s ()
+routeAny routes ctrl = do
+  forM_ routes $ \rt -> rt ctrl
 

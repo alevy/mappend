@@ -19,7 +19,6 @@ import qualified Blog.Models ()
 import qualified Blog.Models.Comment as C
 import Blog.Models.Post
 
-import Blog.Auth
 import Blog.Models
 
 commentsController :: Controller BlogSettings ()
@@ -45,15 +44,14 @@ commentsController = do
             object ["comment" .= comment, "errors" .= errs
                    , "post" .= myPost, "comments" .= comments]
 
-commentsAdminController :: Controller BlogSettings ()
-commentsAdminController = requiresAdmin "/login" $ do
+commentsAdminController :: Controller AdminSettings ()
+commentsAdminController = do
   get "/" $ withConnection $ \conn -> do
     pid <- readQueryParam' "post_id"
     (Just p) <- liftIO $ findRow conn pid
     comments <- liftIO $ allComments conn p
     csrf <- sessionLookup "csrf_token"
-    renderLayout "layouts/admin.html"
-      "admin/comments/index.html" $
+    render "dashboard/comments/index.html" $
         object [ "post" .= p, "comments" .= comments
                , "csrf_token" .= fmap decodeUtf8 csrf ]
 

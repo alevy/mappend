@@ -2,6 +2,7 @@
 module Blog.Models.Blog where
 
 import Data.Aeson (ToJSON(..), object, (.=))
+import Data.ByteString (ByteString)
 import Data.Text (Text)
 import Data.Monoid ((<>))
 import Data.Maybe (listToMaybe)
@@ -9,7 +10,7 @@ import Database.PostgreSQL.ORM
   ( addWhere, modelDBSelect, dbSelect
   , Model(..), DBKey, underscoreModelInfo
   , ValidationError, validate, validateNotEmpty)
-import Database.PostgreSQL.Simple (Connection)
+import Database.PostgreSQL.Simple (Connection, execute)
 import Text.Regex.TDFA ((=~))
 import Text.Regex.TDFA.Text ()
 
@@ -55,4 +56,11 @@ blogLogin conn username password = do
     addWhere "username = ?" [username] $
     addWhere "password_digest = crypt(?, password_digest)" [password] $
     modelDBSelect)
+
+blogChangePassword :: Connection -> Blog -> ByteString -> IO ()
+blogChangePassword conn blog password = do
+  execute conn
+    "UPDATE \"blog\" SET password_digest = crypt(?, gen_salt('bf')) WHERE id = ?"
+    (password, blogId blog)
+  return ()
 

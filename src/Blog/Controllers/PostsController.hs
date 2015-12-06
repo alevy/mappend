@@ -20,7 +20,6 @@ import Web.Simple.Templates
 import Web.Frank (post)
 import Web.REST
 
-import Blog.Auth
 import Blog.Common
 import Blog.Helpers (markdown)
 import Blog.Models
@@ -66,8 +65,8 @@ postsController = rest $ do
             object ["post" .= p, "comments" .= comments]
         Nothing -> respond notFound
 
-postsAdminController :: Controller BlogSettings ()
-postsAdminController = requiresAdmin "/login" $ do
+postsAdminController :: Controller AdminSettings ()
+postsAdminController = do
   post "/preview" $ do
     (params, _) <- parseForm
     let mbody = decodeUtf8 <$> lookup "body" params
@@ -83,8 +82,7 @@ postsAdminController = requiresAdmin "/login" $ do
         setOrderBy "posted_at desc" $ getPosts blog
       let (published, drafts) = partition (isJust . postPostedAt) posts
       csrf <- sessionLookup "csrf_token"
-      renderLayout "layouts/admin.html"
-        "admin/posts/index.html" $
+      render "dashboard/posts/index.html" $
         object [ "published" .= published, "drafts" .= drafts
                , "csrf_token" .= fmap decodeUtf8 csrf]
 
@@ -96,9 +94,8 @@ postsAdminController = requiresAdmin "/login" $ do
       case mpost of
         Just pst -> do
           csrf <- sessionLookup "csrf_token"
-          renderLayout "layouts/admin.html"
-            "admin/posts/edit.html" $
-              object ["post" .= pst, "csrf_token" .= fmap decodeUtf8 csrf]
+          render "dashboard/posts/edit.html" $
+            object ["post" .= pst, "csrf_token" .= fmap decodeUtf8 csrf]
         Nothing -> respond notFound
 
     update $ withConnection $ \conn -> do
@@ -111,7 +108,7 @@ postsAdminController = requiresAdmin "/login" $ do
       -- If submitted with unpublish, unpublish
       when (lookup "unpublish" params /= Nothing) $ do
         liftIO $ save conn $ p { postPostedAt = Nothing }
-        respond $ redirectTo "/admin/posts"
+        respond $ redirectTo "/dashboard/posts"
 
       curTime <- liftIO $ getZonedTime
 
@@ -132,16 +129,16 @@ postsAdminController = requiresAdmin "/login" $ do
           case epost of
             Left errs -> do
               csrf <- sessionLookup "csrf_token"
-              renderLayout "layouts/admin.html" "admin/posts/edit.html" $
+              render "dashboard/posts/edit.html" $
                 object [ "errors" .= errs, "post" .= post0
                        , "csrf_token" .= fmap decodeUtf8 csrf ]
-            Right _ -> respond $ redirectTo "/admin/posts/"
+            Right _ -> respond $ redirectTo "/dashboard/posts/"
         Nothing -> redirectBack
 
     new $ do
       csrf <- sessionLookup "csrf_token"
-      renderLayout "layouts/admin.html"
-        "admin/posts/new.html" $ object [ "csrf_token" .= fmap decodeUtf8 csrf ]
+      render "dashboard/posts/new.html" $
+        object [ "csrf_token" .= fmap decodeUtf8 csrf ]
 
     create $ withConnection $ \conn -> do
       blog <- currentBlog
@@ -170,10 +167,10 @@ postsAdminController = requiresAdmin "/login" $ do
           case epost of
             Left errs -> do
               csrf <- sessionLookup "csrf_token"
-              renderLayout "layouts/admin.html" "admin/posts/new.html" $
+              render "dashboard/posts/new.html" $
                 object [ "errors" .= errs, "post" .= post0
                        , "csrf_token" .= fmap decodeUtf8 csrf ]
-            Right _ -> respond $ redirectTo "/admin/posts/"
+            Right _ -> respond $ redirectTo "/dashboard/posts/"
         Nothing -> redirectBack
 
     delete $ withConnection $ \conn -> do
@@ -185,6 +182,6 @@ postsAdminController = requiresAdmin "/login" $ do
       case mpost of
         Just p -> do
           liftIO $ destroy conn p
-          respond $ redirectTo "/admin/posts"
+          respond $ redirectTo "/dashboard/posts"
         Nothing -> respond notFound
 

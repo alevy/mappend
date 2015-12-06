@@ -1,0 +1,38 @@
+<h2>New Post</h2>
+$if(errors)$
+<div id="errors">
+  <h1>There were errors updating the post</h1>
+  <ul>
+$for(errs in errors)$$for(err in errs)$
+    <li>$err$</li>
+$endfor$$endfor$
+  </ul>
+</div>
+$endif$
+<form action="/dashboard/posts" method="post" acceptCharset="UTF-8">
+  <input type="hidden" name="csrf_token" value="$csrf_token$">
+  <p$if errors.title$ class="error"$endif$>
+    <input type="text" name="title" id="title" placeholder="title"
+    value="$post.postTitle$"/></p>
+  <p$if errors.summary$ class="error"$endif$>
+    <textarea name="summary" id="summary" maxlength="140"
+      placeholder="post summary (in 140 characters or less)"
+      >$post.postSummary$</textarea>
+  </p>
+  <div class="bubble$if errors.body$ error$endif$">
+    <div class="tabs">
+      <a href="#write" class="tab active">Write</a>
+      <a href="#preview" class="tab">Preview</a>
+      <a href="#zen" class="zen"><i class="fa fa-arrows-alt"></i></a>
+      <a href="#exit-zen" class="zen active"><i class="fa fa-times"></i></a>
+    </div>
+    <div class="preview-content"></div>
+    <div class="write-content">
+      <textarea name="body" id="body" placeholder="post body...">$post.postBody$</textarea>
+    </div>
+  </div>
+  <br/>
+  <input type="submit" value="Save Draft"/>
+  <input type="submit" name="publish" value="Publish"/>
+</form>
+
