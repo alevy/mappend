@@ -100,7 +100,10 @@ instance HasTemplates IO AdminSettings where
   layoutObject pageContent pageValue = do
     (Object obj) <- defaultLayoutObject pageContent pageValue
     blog <- currentBlog
-    return $ Object $ H.insert "blog" (toJSON blog) obj
+    domain <- decodeUtf8 <$> (appBaseDomain . adminAppSettings)
+                         <$> controllerState
+    return $ Object $ H.insert "base_domain" (toJSON domain) $
+                      H.insert "blog" (toJSON blog) obj
 
 class HasBlog s where
   currentBlog :: Controller s Blog
