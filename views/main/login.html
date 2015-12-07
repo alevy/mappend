@@ -1,0 +1,21 @@
+$if(error)$
+<div id="errors">
+  <h1>There was an error logging into your blog</h1>
+  <ul>
+    <li>$error$</li>
+  </ul>
+</div>
+$endif$
+<form action="/login" method="POST">
+  <p>
+    <input type="text" name="username"
+     placeholder="username" autofocus/>.hellablog.com
+  </p>
+  <p>
+    <input type="password" name="password"
+     placeholder="password" />
+  </p>
+  <p>
+    <input type="submit" value="Login"/>
+  </p>
+</form>

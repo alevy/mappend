@@ -1,4 +1,4 @@
-{-# LANGUAGE TypeFamilies, DeriveGeneric, OverloadedStrings #-}
+{-# LANGUAGE DeriveGeneric, OverloadedStrings #-}
 module Blog.Models.Comment where
 
 import Control.Monad.IO.Class
@@ -64,7 +64,7 @@ data BlogSpamResult = BlogSpamResult { result :: Text, reason :: Maybe Text } de
 
 instance FromJSON BlogSpamResult
 
-testSpam :: Comment -> Controller AppSettings Comment
+testSpam :: Comment -> Controller BlogSettings Comment
 testSpam comment = do
   mgr <- httpManager
   rIp <- remoteIp

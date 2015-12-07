@@ -4,18 +4,16 @@
 $for(post in drafts)$
     <li>
       <span>
-        <a href="/admin/posts/$post.postId$/edit" title="Edit">
+        <a href="/dashboard/posts/$post.postId$/edit" title="Edit">
           <i class="fa fa-edit"></i>
         </a>
-        <form class="widget" action="/admin/posts/$post.postId$" method="POST">
+        <form class="widget" action="/dashboard/posts/$post.postId$" method="POST">
           <input type="hidden" name="_method" value="DELETE"/>
           <input type="hidden" name="csrf_token" value="$csrf_token$">
           <button class="fa" type="submit" title="Delete"><i class="fa fa-remove"></i></button>
         </form>
       </span>
-      <a href="/admin/posts/$post.postId$/edit" title="Edit">
-        $post.postTitle$
-      </a>
+      $post.postTitle$
     </li>
 $endfor$
   </ul>
@@ -27,18 +25,13 @@ $endfor$
 $for(post in published)$
     <li>
       <span>
-        <a href="/admin/posts/$post.postId$/edit" title="Edit">
+        <a href="/dashboard/posts/$post.postId$/edit" title="Edit">
           <i class="fa fa-edit"></i>
         </a>
-        <a href="/posts/$post.postSlug$" title="View">
-          <i class="fa fa-eye"></i>
-        </a>
-        <a href="/admin/posts/$post.postId$/comments" title="Comments">
+        <a href="/dashboard/posts/$post.postId$/comments" title="Comments">
           <i class="fa fa-comments"></i></a>
       </span>
-      <a href="/admin/posts/$post.postId$/edit" title="Edit">
-        $post.postTitle$
-      </a>
+      $post.postTitle$
     </li>
 $endfor$
   </ul>

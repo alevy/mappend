@@ -1,26 +1,38 @@
-{-# LANGUAGE OverloadedStrings, TypeFamilies, MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveGeneric #-}
 module Blog.Models.Post where
 
+import Blog.Models.Blog (Blog)
+
 import Data.Aeson
 import Data.Char
+import Data.Maybe (listToMaybe)
 import Data.Monoid
 import Data.Text (Text)
 import qualified Data.Text as T
 import Data.Time.LocalTime
 import Database.PostgreSQL.ORM
+import Database.PostgreSQL.Simple (Connection)
 import Text.Regex.TDFA
 import Text.Regex.TDFA.Text ()
 
 import GHC.Generics
 
 data Post = Post { postId :: DBKey
+                 , postBlogId :: DBRef Blog
                  , postTitle :: Text
                  , postSlug :: Text
                  , postSummary :: Text
                  , postBody :: Text
                  , postBodyHtml :: Text
                  , postPostedAt :: Maybe ZonedTime} deriving (Show, Generic)
+
+getPosts :: Blog -> DBSelect Post
+getPosts blog = assocWhere has blog
+
+findPost :: Connection -> Blog -> DBRef Post -> IO (Maybe Post)
+findPost conn blog pid = fmap listToMaybe $ dbSelect conn $
+  addWhere "post.id = ?" [pid] $ getPosts blog
 
 instance ToJSON Post where
   toJSON = genericToJSON defaultOptions

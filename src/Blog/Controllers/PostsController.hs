@@ -20,42 +20,44 @@ import Web.Simple.Templates
 import Web.Frank (post)
 import Web.REST
 
-import Blog.Auth
 import Blog.Common
 import Blog.Helpers (markdown)
 import Blog.Models
 import Blog.Models.Post
 
-atomFeed :: Controller AppSettings ()
+atomFeed :: Controller BlogSettings ()
 atomFeed = withConnection $ \conn -> do
+  blog <- currentBlog
   now <- liftIO getZonedTime
   posts <- liftIO $ dbSelect conn $ addWhere_ "posted_at is not null"
                                   $ setLimit 10
                                   $ setOrderBy "posted_at desc"
-                                  $ modelDBSelect
+                                  $ getPosts blog
   renderPlain "feed.atom" $
     object ["posts" .= (posts :: [Post]), "now" .= now]
 
-postsController :: REST IO AppSettings
+postsController :: REST IO BlogSettings
 postsController = rest $ do
 
   index $ withConnection $ \conn -> do
+    blog <- currentBlog
     mpage <- readQueryParam "offset"
     let page = maybe 0 id mpage
     posts <- liftIO $ dbSelect conn $ addWhere_ "posted_at is not null"
                                     $ setLimit 10
                                     $ setOffset (page * 10)
                                     $ setOrderBy "posted_at desc"
-                                    $ modelDBSelect
+                                    $ getPosts blog
     render "posts/index.html" (posts :: [Post])
 
   show $ do
+    blog <- currentBlog
     withConnection $ \conn -> do
       slug <- queryParam' "id"
       mpost <- liftIO $ listToMaybe <$>
         (dbSelect conn $
           addWhere "slug = ?" [slug :: S8.ByteString] $
-          modelDBSelect)
+          getPosts blog)
       case mpost of
         Just p -> do
           comments <- liftIO $ allComments conn p
@@ -63,8 +65,8 @@ postsController = rest $ do
             object ["post" .= p, "comments" .= comments]
         Nothing -> respond notFound
 
-postsAdminController :: Controller AppSettings ()
-postsAdminController = requiresAdmin "/login" $ do
+postsAdminController :: Controller AdminSettings ()
+postsAdminController = do
   post "/preview" $ do
     (params, _) <- parseForm
     let mbody = decodeUtf8 <$> lookup "body" params
@@ -73,49 +75,43 @@ postsAdminController = requiresAdmin "/login" $ do
       Just pBody -> respond $
                     okJson $ encode $ object ["body" .= markdown pBody]
 
-  post ":id/unpublish" $ withConnection $ \conn -> do
-    pid <- readQueryParam' "id"
-    (params, _) <- parseForm
-    verifyCSRF params
-    mpost <- liftIO $ findRow conn pid
-    case mpost of
-      Just post0 -> do
-        epost <- liftIO $ trySave conn $ post0 { postPostedAt = Nothing }
-        case epost of
-          Left errs -> do
-            csrf <- sessionLookup "csrf_token"
-            renderLayout "layouts/admin.html" "admin/posts/edit.html" $
-              object [ "errors" .= errs, "post" .= post0
-                     , "csrf_token" .= fmap decodeUtf8 csrf ]
-          Right _ -> redirectBack
-      Nothing -> redirectBack
-
   routeREST $ rest $ do
     index $ withConnection $ \conn -> do
+      blog <- currentBlog
       posts <- liftIO $ dbSelect conn $
-        setOrderBy "posted_at desc" $ modelDBSelect
+        setOrderBy "posted_at desc" $ getPosts blog
       let (published, drafts) = partition (isJust . postPostedAt) posts
       csrf <- sessionLookup "csrf_token"
-      renderLayout "layouts/admin.html"
-        "admin/posts/index.html" $
+      render "dashboard/posts/index.html" $
         object [ "published" .= published, "drafts" .= drafts
                , "csrf_token" .= fmap decodeUtf8 csrf]
 
     edit $ withConnection $ \conn -> do
       pid <- readQueryParam' "id"
-      (Just p) <- liftIO $
-        findRow conn pid :: Controller AppSettings (Maybe Post)
-      csrf <- sessionLookup "csrf_token"
-      renderLayout "layouts/admin.html"
-        "admin/posts/edit.html" $
-          object ["post" .= p, "csrf_token" .= fmap decodeUtf8 csrf]
+      blog <- currentBlog
+      mpost <- liftIO $
+        findPost conn blog pid
+      case mpost of
+        Just pst -> do
+          csrf <- sessionLookup "csrf_token"
+          render "dashboard/posts/edit.html" $
+            object ["post" .= pst, "csrf_token" .= fmap decodeUtf8 csrf]
+        Nothing -> respond notFound
 
     update $ withConnection $ \conn -> do
       pid <- readQueryParam' "id"
-      (Just p) <- liftIO $ findRow conn pid
+      blog <- currentBlog
+      (Just p) <- liftIO $ findPost conn blog pid
       (params, _) <- parseForm
       verifyCSRF params
+
+      -- If submitted with unpublish, unpublish
+      when (lookup "unpublish" params /= Nothing) $ do
+        liftIO $ save conn $ p { postPostedAt = Nothing }
+        respond $ redirectTo "/dashboard/posts"
+
       curTime <- liftIO $ getZonedTime
+
       let mpost = do
             pTitle <- (decodeUtf8 <$> lookup "title" params) <|>
                         (pure $ postTitle p)
@@ -133,18 +129,19 @@ postsAdminController = requiresAdmin "/login" $ do
           case epost of
             Left errs -> do
               csrf <- sessionLookup "csrf_token"
-              renderLayout "layouts/admin.html" "admin/posts/edit.html" $
+              render "dashboard/posts/edit.html" $
                 object [ "errors" .= errs, "post" .= post0
                        , "csrf_token" .= fmap decodeUtf8 csrf ]
-            Right _ -> respond $ redirectTo "/admin/posts/"
+            Right _ -> respond $ redirectTo "/dashboard/posts/"
         Nothing -> redirectBack
 
     new $ do
       csrf <- sessionLookup "csrf_token"
-      renderLayout "layouts/admin.html"
-        "admin/posts/new.html" $ object [ "csrf_token" .= fmap decodeUtf8 csrf ]
+      render "dashboard/posts/new.html" $
+        object [ "csrf_token" .= fmap decodeUtf8 csrf ]
 
     create $ withConnection $ \conn -> do
+      blog <- currentBlog
       (params, _) <- parseForm
       verifyCSRF params
       curTime <- liftIO $ getZonedTime
@@ -157,6 +154,7 @@ postsAdminController = requiresAdmin "/login" $ do
                       <|> (Just $ slugFromTitle pTitle))
             let postedAt = lookup "publish" params >> pure curTime
             return $ Post { postId = NullKey
+                          , postBlogId = mkDBRef blog
                           , postTitle = pTitle
                           , postSummary = pSummary
                           , postSlug = pSlug
@@ -169,17 +167,21 @@ postsAdminController = requiresAdmin "/login" $ do
           case epost of
             Left errs -> do
               csrf <- sessionLookup "csrf_token"
-              renderLayout "layouts/admin.html" "admin/posts/new.html" $
+              render "dashboard/posts/new.html" $
                 object [ "errors" .= errs, "post" .= post0
                        , "csrf_token" .= fmap decodeUtf8 csrf ]
-            Right _ -> respond $ redirectTo "/admin/posts/"
+            Right _ -> respond $ redirectTo "/dashboard/posts/"
         Nothing -> redirectBack
 
     delete $ withConnection $ \conn -> do
       pid <- readQueryParam' "id"
       (params, _) <- parseForm
       verifyCSRF params
-      (Just p) <- liftIO $ findRow conn pid
-      liftIO $ destroy conn (p :: Post)
-      respond $ redirectTo "/admin/posts"
+      blog <- currentBlog
+      mpost <- liftIO $ findPost conn blog pid
+      case mpost of
+        Just p -> do
+          liftIO $ destroy conn p
+          respond $ redirectTo "/dashboard/posts"
+        Nothing -> respond notFound
 

@@ -1,6 +1,6 @@
 <header>
   <h2>Edit Post</h2>
-  <a href="/admin/posts">&larr; back</a>
+  <a href="/dashboard/posts">&larr; back</a>
 </header>
 $if(errors)$
 <div id="errors">
@@ -12,7 +12,7 @@ $endfor$$endfor$
   </ul>
 </div>
 $endif$
-<form class="content" action="/admin/posts/$post.postId$"
+<form class="content" action="/dashboard/posts/$post.postId$"
   method="post" acceptCharset="UTF-8">
   <input type="hidden" name="_method" value="PUT"/>
   <input type="hidden" name="csrf_token" value="$csrf_token$">

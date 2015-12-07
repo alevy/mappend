@@ -1,0 +1,36 @@
+$if(errors)$
+<div id="errors">
+  <h1>There were errors updating your preferences</h1>
+  <ul>
+$for(errs in errors)$$for(err in errs)$
+    <li>$err$</li>
+$endfor$$endfor$
+  </ul>
+</div>
+$endif$
+<form action="/admin/preferences" method="POST">
+  <p$if errors.title$ class="error"$endif$>
+    <label for="blog_title">Blog Title</label><br/>
+    <input type="text" name="title" value="$blog.title$" id="blog_title"
+      placeholder="Blog Title"/>
+  </p>
+  <input type="submit" value="Update">
+</form>
+
+<h2>Change Password</h2>
+
+<form action="/admin/preferences/password" method="POST">
+  <p>
+    <input type="password" name="current_password"
+      placeholder="Current Password"/>
+  </p>
+  <p>
+    <input type="password" name="new_password"
+      placeholder="New Password"/>
+  </p>
+  <p>
+    <input type="password" name="verify_password"
+      placeholder="Verify New Password"/>
+  </p>
+  <input type="submit" value="Change password"/>
+</form>

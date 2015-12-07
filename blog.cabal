@@ -35,7 +35,7 @@ executable blog
     markdown,
     network,
     pureMD5,
-    simple >= 0.10,
+    simple >= 0.11,
     simple-session >= 0.10.1,
     -- ^ secure & httponly cookie options
     simple-templates,
@@ -48,5 +48,6 @@ executable blog
     postgresql-orm,
     regex-tdfa,
     regex-tdfa-text,
-    transformers
+    transformers,
+    unordered-containers
 

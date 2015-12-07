@@ -11,10 +11,10 @@ import Data.Hex
 import qualified Data.Text as T
 import Data.Text.Encoding
 import Data.Maybe
-import Database.PostgreSQL.Simple
 import Network.HTTP.Conduit (withManager)
 import Network.Wai.Request (appearsSecure)
 import System.Entropy
+import System.Environment (getEnvironment)
 import Web.Frank
 import Web.Simple
 import Web.Simple.Session
@@ -22,9 +22,16 @@ import Web.Simple.Templates
 import Web.Authenticate.OpenId
 
 import Blog.Common
+import Blog.Models.Blog (blogId, findByOpenid, blogLogin)
 
 openIdController :: (T.Text -> Controller a ()) -> Controller a ()
 openIdController loginHandler = do
+  env <- liftIO $ lookup "ENV" `fmap` getEnvironment
+  when (env == Just "development") $ do
+    get "auth/login" $ do
+      openid <- queryParam' "openid_identifier"
+      loginHandler openid
+
   get "auth/finalize" $ do
     prms <- (map (\(k,(Just v)) -> (decodeUtf8 k, decodeUtf8 v)))
               <$> queryString <$> request
@@ -45,35 +52,54 @@ openIdController loginHandler = do
                     completePage Nothing []
     respond $ redirectTo $ encodeUtf8 fu
 
-handleLogin :: T.Text -> Controller AppSettings ()
+handleLogin :: T.Text -> Controller AdminSettings ()
 handleLogin openid = do
-  res <- withConnection $ \conn -> liftIO $
-    query_ conn "select openid from admins"
-  when (length res == 0 || head res /= (Only openid)) $
-    respond forbidden
+  mblog <- withConnection $ \conn -> liftIO $
+    findByOpenid conn openid
+  when (isJust mblog) $ do
+      sessionInsert "blogger_id" $ S8.pack $ show $ blogId $ fromJust mblog
+
   ret <- fromMaybe "/" `fmap` sessionLookup "return_to"
   sessionDelete "return_to"
-  sessionInsert "user" $ encodeUtf8 openid
   csrfToken <- liftIO $ hex <$> getEntropy 32
   sessionInsert "csrf_token" $ csrfToken
   respond $ redirectTo ret
 
-logout :: Controller AppSettings ()
+logout :: Controller AdminSettings ()
 logout = do
-  sessionDelete "user"
+  sessionDelete "blogger_id"
   respond $ redirectTo "/"
 
 requiresAdmin :: S8.ByteString
-              -> Controller AppSettings b -> Controller AppSettings b
+              -> Controller AdminSettings b -> Controller AdminSettings b
 requiresAdmin loginUrl cnt = do
-  muser <- sessionLookup "user"
-  if isJust muser then
-    cnt
-    else do
+  mbid <- sessionLookup "blogger_id"
+  curBlog <- currentBlog
+  case mbid of
+    Just bid | (DBKey $ read . S8.unpack $ bid) == blogId curBlog -> cnt
+    _ -> do
       req <- request
       sessionInsert "return_to" $ rawPathInfo req
       respond $ redirectTo loginUrl
 
 loginPage :: Controller AppSettings ()
-loginPage = renderLayout "layouts/login.html" "login.html" Null
+loginPage = do
+  get "/" $ render "main/login.html" ()
+
+  post "/" $ do
+    params <- fst <$> parseForm
+    let username = decodeUtf8 <$> fromMaybe "" $ lookup "username" params
+        password = decodeUtf8 <$> fromMaybe "" $ lookup "password" params
+    muser <- withConnection $ \conn -> liftIO $ blogLogin conn username password
+    case muser of
+      Nothing -> do
+        render "main/login.html" $ object
+          [ "error" .= ("Incorrect username/password" :: T.Text)]
+      Just  blog -> do
+        sessionInsert "blogger_id" $ S8.pack $ show $ blogId blog
+        ret <- fromMaybe "/dashboard" `fmap` sessionLookup "return_to"
+        sessionDelete "return_to"
+        csrfToken <- liftIO $ hex <$> getEntropy 32
+        sessionInsert "csrf_token" $ csrfToken
+        respond $ redirectTo ret
 

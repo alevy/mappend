@@ -18,6 +18,14 @@ CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 
 
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
+
+
+
+COMMENT ON EXTENSION pgcrypto IS 'cryptographic functions';
+
+
 SET search_path = public, pg_catalog;
 
 SET default_tablespace = '';
@@ -25,9 +33,26 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 
-CREATE TABLE admins (
-    openid character varying(255) NOT NULL
+CREATE TABLE blog (
+    id integer NOT NULL,
+    username character varying(255) NOT NULL,
+    openid character varying(255),
+    title character varying(255) NOT NULL,
+    password_digest text DEFAULT crypt(md5((random())::text), gen_salt('bf'::text)) NOT NULL
 );
+
+
+
+CREATE SEQUENCE blog_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+
+ALTER SEQUENCE blog_id_seq OWNED BY blog.id;
 
 
 
@@ -56,6 +81,27 @@ ALTER SEQUENCE comment_id_seq OWNED BY comment.id;
 
 
 
+CREATE TABLE hostname (
+    id integer NOT NULL,
+    hostname text NOT NULL,
+    blog_id integer
+);
+
+
+
+CREATE SEQUENCE hostname_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+
+ALTER SEQUENCE hostname_id_seq OWNED BY hostname.id;
+
+
+
 CREATE TABLE post (
     id integer NOT NULL,
     title character varying(255),
@@ -63,7 +109,8 @@ CREATE TABLE post (
     posted_at timestamp with time zone DEFAULT now(),
     slug character varying(32) NOT NULL,
     body_html text NOT NULL,
-    summary text NOT NULL
+    summary text NOT NULL,
+    blog_id integer NOT NULL
 );
 
 
@@ -87,7 +134,15 @@ CREATE TABLE schema_migrations (
 
 
 
+ALTER TABLE ONLY blog ALTER COLUMN id SET DEFAULT nextval('blog_id_seq'::regclass);
+
+
+
 ALTER TABLE ONLY comment ALTER COLUMN id SET DEFAULT nextval('comment_id_seq'::regclass);
+
+
+
+ALTER TABLE ONLY hostname ALTER COLUMN id SET DEFAULT nextval('hostname_id_seq'::regclass);
 
 
 
@@ -95,8 +150,18 @@ ALTER TABLE ONLY post ALTER COLUMN id SET DEFAULT nextval('post_id_seq'::regclas
 
 
 
-ALTER TABLE ONLY admins
-    ADD CONSTRAINT admins_pkey PRIMARY KEY (openid);
+ALTER TABLE ONLY blog
+    ADD CONSTRAINT blog_openid_key UNIQUE (openid);
+
+
+
+ALTER TABLE ONLY blog
+    ADD CONSTRAINT blog_pkey PRIMARY KEY (id);
+
+
+
+ALTER TABLE ONLY blog
+    ADD CONSTRAINT blog_username_key UNIQUE (username);
 
 
 
@@ -105,8 +170,22 @@ ALTER TABLE ONLY comment
 
 
 
+ALTER TABLE ONLY hostname
+    ADD CONSTRAINT hostname_hostname_key UNIQUE (hostname);
+
+
+
+ALTER TABLE ONLY hostname
+    ADD CONSTRAINT hostname_pkey PRIMARY KEY (id);
+
+
+
 ALTER TABLE ONLY post
     ADD CONSTRAINT post_pkey PRIMARY KEY (id);
+
+
+
+CREATE UNIQUE INDEX blog_username_idx ON blog USING btree (username);
 
 
 
@@ -116,5 +195,15 @@ CREATE UNIQUE INDEX post_stub_idx ON post USING btree (slug);
 
 ALTER TABLE ONLY comment
     ADD CONSTRAINT comment_post_id_fkey FOREIGN KEY (post_id) REFERENCES post(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY hostname
+    ADD CONSTRAINT hostname_blog_id_fkey FOREIGN KEY (blog_id) REFERENCES blog(id);
+
+
+
+ALTER TABLE ONLY post
+    ADD CONSTRAINT post_blog_id_fkey FOREIGN KEY (blog_id) REFERENCES blog(id);
 
 
