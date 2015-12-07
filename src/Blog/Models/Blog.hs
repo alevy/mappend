@@ -19,7 +19,7 @@ import GHC.Generics
 data Blog = Blog { blogId :: DBKey
                  , blogUsername :: Text
                  , blogTitle :: Text
-                 , blogOpenid :: Text } deriving (Show, Generic)
+                 , blogOpenid :: Maybe Text } deriving (Show, Generic)
 
 validateUsername :: Blog -> ValidationError
 validateUsername = validate (\blog -> blogUsername blog =~ pattern)
