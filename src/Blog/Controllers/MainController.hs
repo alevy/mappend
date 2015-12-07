@@ -24,7 +24,7 @@ mainController = do
 
   dashboard $ get "/logout" logout
   routeName "dashboard" $ dashboard $ requiresAdmin "/login" $ do
-    get "/" $ render "dashboard/posts/new.html" ()
+    get "/" $ respond $ redirectTo "/dashboard/posts/new"
     routeName "posts" $ do
       postsAdminController
       routePattern ":post_id/comments" $ commentsAdminController

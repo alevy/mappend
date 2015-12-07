@@ -14,7 +14,7 @@
     write.hide();
     link.addClass('active');
     link.siblings('.tab').removeClass('active');
-    $.post('/admin/posts/preview', { body: write.children('textarea').val() }, function(data) {
+    $.post('/dashboard/posts/preview', { body: write.children('textarea').val() }, function(data) {
       prev.html(data.body);
     });
     return true;
