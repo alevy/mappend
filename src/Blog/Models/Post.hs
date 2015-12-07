@@ -64,3 +64,22 @@ slugFromTitle title = T.take 32 $
   T.map (\c -> if c == ' ' then '-' else toLower c) $
   T.filter (\c -> c == ' ' || isAlphaNum c) title
 
+summarizePost :: Int -> Text -> Text
+summarizePost maxLen originalHtml =
+  if T.length result < maxLen - 3
+    then result
+    else T.append (T.take (maxLen - 3) result) "..."
+  where result :: Text
+        result = T.replace "\n" " " $ T.take maxLen stripTags
+
+        stripTags :: Text
+        stripTags = snd $ T.foldl stripTags' (True, "") originalHtml
+
+        stripTags' :: (Bool, Text) -> Char -> (Bool, Text)
+        stripTags' (intxt, accm) char =
+          case char of
+            '<' | intxt -> (False, accm)
+            '>' | not intxt -> (True, accm)
+            c   | intxt -> (True, accm `T.snoc` c)
+            _ -> (intxt, accm)
+

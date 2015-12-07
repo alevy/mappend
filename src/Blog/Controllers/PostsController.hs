@@ -67,6 +67,7 @@ postsController = rest $ do
 
 postsAdminController :: Controller AdminSettings ()
 postsAdminController = do
+  csrf <- sessionLookup "csrf_token"
   post "/preview" $ do
     (params, _) <- parseForm
     let mbody = decodeUtf8 <$> lookup "body" params
@@ -81,7 +82,6 @@ postsAdminController = do
       posts <- liftIO $ dbSelect conn $
         setOrderBy "posted_at desc" $ getPosts blog
       let (published, drafts) = partition (isJust . postPostedAt) posts
-      csrf <- sessionLookup "csrf_token"
       render "dashboard/posts/index.html" $
         object [ "published" .= published, "drafts" .= drafts
                , "csrf_token" .= fmap decodeUtf8 csrf]
@@ -93,7 +93,6 @@ postsAdminController = do
         findPost conn blog pid
       case mpost of
         Just pst -> do
-          csrf <- sessionLookup "csrf_token"
           render "dashboard/posts/edit.html" $
             object ["post" .= pst, "csrf_token" .= fmap decodeUtf8 csrf]
         Nothing -> respond notFound
@@ -119,16 +118,17 @@ postsAdminController = do
                       (pure $ postBody p)
             let postedAt = (lookup "publish" params >> pure curTime) <|>
                               postPostedAt p
+            let bodyHtml = markdown pBody
             return $ p { postTitle = pTitle
                           , postBody = pBody
-                          , postBodyHtml = markdown pBody
+                          , postSummary = summarizePost 140 bodyHtml
+                          , postBodyHtml = bodyHtml
                           , postPostedAt = postedAt }
       case mpost of
         Just post0 -> do
           epost <- liftIO $ trySave conn post0
           case epost of
             Left errs -> do
-              csrf <- sessionLookup "csrf_token"
               render "dashboard/posts/edit.html" $
                 object [ "errors" .= errs, "post" .= post0
                        , "csrf_token" .= fmap decodeUtf8 csrf ]
@@ -136,7 +136,6 @@ postsAdminController = do
         Nothing -> redirectBack
 
     new $ do
-      csrf <- sessionLookup "csrf_token"
       render "dashboard/posts/new.html" $
         object [ "csrf_token" .= fmap decodeUtf8 csrf ]
 
@@ -147,26 +146,25 @@ postsAdminController = do
       curTime <- liftIO $ getZonedTime
       let mpost = do
             pTitle <- decodeUtf8 <$> lookup "title" params
-            pSummary <- decodeUtf8 <$> lookup "summary" params
             pBody <- decodeUtf8 <$> lookup "body" params
             pSlug <- (((not . T.null) `mfilter`
                         (decodeUtf8 <$> lookup "slug" params))
                       <|> (Just $ slugFromTitle pTitle))
             let postedAt = lookup "publish" params >> pure curTime
+            let bodyHtml = markdown pBody
             return $ Post { postId = NullKey
                           , postBlogId = mkDBRef blog
                           , postTitle = pTitle
-                          , postSummary = pSummary
+                          , postSummary = summarizePost 140 bodyHtml
                           , postSlug = pSlug
                           , postBody = pBody
-                          , postBodyHtml = markdown pBody
+                          , postBodyHtml = bodyHtml
                           , postPostedAt = postedAt }
       case mpost of
         Just post0 -> do
           epost <- liftIO $ trySave conn post0
           case epost of
             Left errs -> do
-              csrf <- sessionLookup "csrf_token"
               render "dashboard/posts/new.html" $
                 object [ "errors" .= errs, "post" .= post0
                        , "csrf_token" .= fmap decodeUtf8 csrf ]

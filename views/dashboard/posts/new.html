@@ -14,11 +14,6 @@ $endif$
   <p$if errors.title$ class="error"$endif$>
     <input type="text" name="title" id="title" placeholder="title"
     value="$post.postTitle$"/></p>
-  <p$if errors.summary$ class="error"$endif$>
-    <textarea name="summary" id="summary" maxlength="140"
-      placeholder="post summary (in 140 characters or less)"
-      >$post.postSummary$</textarea>
-  </p>
   <div class="bubble$if errors.body$ error$endif$">
     <div class="tabs">
       <a href="#write" class="tab active">Write</a>
