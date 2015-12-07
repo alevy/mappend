@@ -81,6 +81,27 @@ ALTER SEQUENCE comment_id_seq OWNED BY comment.id;
 
 
 
+CREATE TABLE hostname (
+    id integer NOT NULL,
+    hostname text NOT NULL,
+    blog_id integer
+);
+
+
+
+CREATE SEQUENCE hostname_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+
+ALTER SEQUENCE hostname_id_seq OWNED BY hostname.id;
+
+
+
 CREATE TABLE post (
     id integer NOT NULL,
     title character varying(255),
@@ -121,6 +142,10 @@ ALTER TABLE ONLY comment ALTER COLUMN id SET DEFAULT nextval('comment_id_seq'::r
 
 
 
+ALTER TABLE ONLY hostname ALTER COLUMN id SET DEFAULT nextval('hostname_id_seq'::regclass);
+
+
+
 ALTER TABLE ONLY post ALTER COLUMN id SET DEFAULT nextval('post_id_seq'::regclass);
 
 
@@ -145,6 +170,16 @@ ALTER TABLE ONLY comment
 
 
 
+ALTER TABLE ONLY hostname
+    ADD CONSTRAINT hostname_hostname_key UNIQUE (hostname);
+
+
+
+ALTER TABLE ONLY hostname
+    ADD CONSTRAINT hostname_pkey PRIMARY KEY (id);
+
+
+
 ALTER TABLE ONLY post
     ADD CONSTRAINT post_pkey PRIMARY KEY (id);
 
@@ -160,6 +195,11 @@ CREATE UNIQUE INDEX post_stub_idx ON post USING btree (slug);
 
 ALTER TABLE ONLY comment
     ADD CONSTRAINT comment_post_id_fkey FOREIGN KEY (post_id) REFERENCES post(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY hostname
+    ADD CONSTRAINT hostname_blog_id_fkey FOREIGN KEY (blog_id) REFERENCES blog(id);
 
 
 

@@ -24,6 +24,7 @@ import Web.Simple.Templates
 import Web.Simple.Session
 import Blog.Helpers
 import Blog.Models.Blog (Blog, findByUsername)
+import Blog.Models.Hostname (findByHostname)
 import System.Environment (getEnv)
 
 data AppSettings = AppSettings { appDB :: PostgreSQLConn
@@ -122,23 +123,34 @@ httpManager = (appHttpManager . blogAppSettings) <$> controllerState
 
 withBlogDomain :: Controller BlogSettings () -> Controller AppSettings ()
 withBlogDomain act = do
-  mhostname <- (return . fmap (S8.split '.'))=<< requestHeader "Host"
+  mhostname <- requestHeader "Host"
   case mhostname of
-    (Just (username:_)) -> do
-      mblog <- withConnection $ \conn -> liftIO $
-        findByUsername conn $ decodeUtf8 username
-      case mblog of
-        Just blog -> do
-          st <- controllerState
-          req <- request
-          let newst = BlogSettings { blogAppSettings = st, blogBlog = blog }
-          (eres, s) <- liftIO $ runController act newst req
-          putState $ blogAppSettings s
-          case eres of
-            Left resp -> respond resp
-            Right a -> return a
-        Nothing -> return ()
-    _ -> return ()
+    Nothing -> return ()
+    Just hostname -> do
+      domain <- baseDomain
+      let (username, hDomain) = S8.break (== '.') hostname
+      if hDomain == '.' `S8.cons` domain
+        then do
+          mblog <- withConnection $ \conn -> liftIO $
+            findByUsername conn $ decodeUtf8 username
+          switchState mblog
+        else do
+          mblog <- withConnection $ \conn -> liftIO $
+            findByHostname conn $ decodeUtf8 hostname
+          switchState mblog
+  where switchState :: Maybe Blog -> Controller AppSettings ()
+        switchState mblog = do
+          case mblog of
+            Just blog -> do
+              st <- controllerState
+              req <- request
+              let newst = BlogSettings { blogAppSettings = st, blogBlog = blog }
+              (eres, s) <- liftIO $ runController act newst req
+              putState $ blogAppSettings s
+              case eres of
+                Left resp -> respond resp
+                Right a -> return a
+            Nothing -> return ()
 
 dashboard :: Controller AdminSettings () -> Controller AppSettings ()
 dashboard act = do
