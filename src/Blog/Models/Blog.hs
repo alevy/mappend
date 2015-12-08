@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveGeneric, OverloadedStrings #-}
 module Blog.Models.Blog where
 
+import Control.Exception (throwIO)
 import Control.Monad (when)
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Trans.Except (ExceptT(..), runExceptT, throwE)
@@ -16,6 +17,8 @@ import Database.PostgreSQL.ORM
   , Model(..), DBKey(..), underscoreModelInfo, trySave
   , ValidationError, validateNotEmpty, validationError)
 import Database.PostgreSQL.Simple (Connection, execute, query)
+import Database.PostgreSQL.Simple.Errors
+  (catchViolation,  ConstraintViolation(..))
 import Database.PostgreSQL.Simple.ToField (ToField(..), Action(..))
 import Database.PostgreSQL.Simple.FromField (FromField(..))
 import Text.Regex.TDFA ((=~))
@@ -106,9 +109,14 @@ tryRegisterBlog conn username password verifyPassword inviteCode =
       validationError "verify_password"
                       "Password verification doesn't match password"
 
-    ExceptT $ trySave conn $
-              Blog { blogId = NullKey
-                   , blogUsername = username
-                   , blogPasswordDigest = Plaintext password
-                   , blogTitle = "My Blog" }
+    ExceptT $ catchSqlErr $
+      trySave conn $
+        Blog { blogId = NullKey
+             , blogUsername = username
+             , blogPasswordDigest = Plaintext password
+             , blogTitle = "My Blog" }
+  where catchSqlErr fn = catchViolation catcher fn
+        catcher _ (UniqueViolation "blog_username_key") = return $ Left $
+          validationError "username" "Username already exists"
+        catcher e _ = throwIO e
 

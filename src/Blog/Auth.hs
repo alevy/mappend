@@ -63,6 +63,8 @@ register = do
         render "main/index.html" $ object
           [ "invite_code" .= inviteCode
           , "username" .= username
+          , "password" .= password
+          , "verify_password" .= verifyPassword
           , "errors" .= errs ]
 
 login :: Controller AppSettings ()

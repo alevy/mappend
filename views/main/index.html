@@ -12,7 +12,7 @@ $endfor$$endfor$
 $endif$
 <form action="/register" method="post">
   <p$if errors.username$ class="error"$endif$>
-    <input type="text" name="username"
+    <input type="text" name="username" value="$username$"
       placeholder="username" autofocus/>.sgribble.com
   </p>
   <p$if errors.invite_code$ class="error"$endif$>
@@ -20,10 +20,11 @@ $endif$
       value="$invite_code$"/>
   </p>
   <p$if errors.password$ class="error"$endif$>
-    <input type="password" name="password" placeholder="password"/>
+    <input type="password" name="password" value="$password$"
+      placeholder="password"/>
   </p>
   <p$if errors.verify_password$ class="error"$endif$>
-    <input type="password" name="verify_password"
+    <input type="password" name="verify_password" value="$verify_password$"
       placeholder="verify password"/>
   </p>
   <input type="submit" value="sign up"/>
