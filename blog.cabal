@@ -21,7 +21,6 @@ executable blog
     -- ^ Applicative as superclass of Monad
     aeson >= 0.10,
     -- ^ Aeson toEncoding
-    authenticate,
     blaze-html,
     bytestring,
     data-default,
@@ -31,7 +30,6 @@ executable blog
     highlighting-kate,
     html-truncate,
     http-client,
-    http-conduit,
     markdown,
     network,
     pureMD5,
