@@ -101,6 +101,12 @@ ALTER SEQUENCE hostname_id_seq OWNED BY hostname.id;
 
 
 
+CREATE TABLE invite (
+    invite_code text NOT NULL
+);
+
+
+
 CREATE TABLE post (
     id integer NOT NULL,
     title character varying(255),
@@ -171,6 +177,11 @@ ALTER TABLE ONLY hostname
 
 ALTER TABLE ONLY hostname
     ADD CONSTRAINT hostname_pkey PRIMARY KEY (id);
+
+
+
+ALTER TABLE ONLY invite
+    ADD CONSTRAINT invite_pkey PRIMARY KEY (invite_code);
 
 
 
