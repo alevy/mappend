@@ -43,7 +43,8 @@ executable blog
     text,
     time,
     postgresql-simple,
-    postgresql-orm,
+    postgresql-orm >= 0.4.1,
+    -- ^ validations
     regex-tdfa,
     regex-tdfa-text,
     transformers,
