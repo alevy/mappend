@@ -36,7 +36,6 @@ SET default_with_oids = false;
 CREATE TABLE blog (
     id integer NOT NULL,
     username character varying(255) NOT NULL,
-    openid character varying(255),
     title character varying(255) NOT NULL,
     password_digest text DEFAULT crypt(md5((random())::text), gen_salt('bf'::text)) NOT NULL
 );
@@ -147,11 +146,6 @@ ALTER TABLE ONLY hostname ALTER COLUMN id SET DEFAULT nextval('hostname_id_seq':
 
 
 ALTER TABLE ONLY post ALTER COLUMN id SET DEFAULT nextval('post_id_seq'::regclass);
-
-
-
-ALTER TABLE ONLY blog
-    ADD CONSTRAINT blog_openid_key UNIQUE (openid);
 
 
 
