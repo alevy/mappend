@@ -19,7 +19,7 @@ import Web.Simple.Templates
 import Blog.Common
 import Blog.Models.Blog (blogId, blogLogin)
 
-logout :: Controller AdminSettings ()
+logout :: HasSession s => Controller s ()
 logout = do
   sessionDelete "blogger_id"
   respond $ redirectTo "/"
@@ -31,13 +31,24 @@ requiresAdmin loginUrl cnt = do
   curBlog <- currentBlog
   case mbid of
     Just bid | (DBKey $ read . S8.unpack $ bid) == blogId curBlog -> cnt
-    _ -> do
-      req <- request
-      sessionInsert "return_to" $ rawPathInfo req
-      respond $ redirectTo loginUrl
+    _ -> redirectLogin loginUrl
 
-loginPage :: Controller AppSettings ()
-loginPage = do
+redirectLogin :: HasSession s => S8.ByteString -> Controller s a
+redirectLogin loginUrl = do
+  req <- request
+  sessionInsert "return_to" $ rawPathInfo req
+  respond $ redirectTo loginUrl
+
+register :: Controller AppSettings ()
+register = do
+  get "/" $ do
+    inviteCode <- queryParam "invite_code"
+    render "main/index.html" $
+      object ["invite_code" .= (inviteCode :: Maybe T.Text) ]
+
+
+login :: Controller AppSettings ()
+login = do
   get "/" $ render "main/login.html" ()
 
   post "/" $ do
