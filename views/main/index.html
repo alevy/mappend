@@ -1,21 +1,28 @@
 <h1>sgribble</h1>
 
+$if(errors)$
+<div id="errors">
+  <h1>There were errors registering</h1>
+  <ul>
+$for(errs in errors)$$for(err in errs)$
+    <li>$err$</li>
+$endfor$$endfor$
+  </ul>
+</div>
+$endif$
 <form action="/register" method="post">
-  <p>
+  <p$if errors.username$ class="error"$endif$>
     <input type="text" name="username"
       placeholder="username" autofocus/>.sgribble.com
   </p>
-$if invite_code$
-    <input type="hidden" name="invite_code" value="$invite_code$"/>
-$else$
-  <p>
-    <input type="text" name="invite_code" placeholder="invite code"/>
+  <p$if errors.invite_code$ class="error"$endif$>
+    <input type="text" name="invite_code" placeholder="invite code"
+      value="$invite_code$"/>
   </p>
-$endif$
-  <p>
+  <p$if errors.password$ class="error"$endif$>
     <input type="password" name="password" placeholder="password"/>
   </p>
-  <p>
+  <p$if errors.verify_password$ class="error"$endif$>
     <input type="password" name="verify_password"
       placeholder="verify password"/>
   </p>

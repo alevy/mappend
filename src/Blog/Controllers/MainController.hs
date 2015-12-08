@@ -12,7 +12,7 @@ import Blog.Common
 
 mainController :: Controller AppSettings ()
 mainController = do
-  routeAny [routeTop, routeName "/register" . routeTop] $ register
+  routeAny [routeTop, routeName "register" . routeTop] $ register
   routeName "login" $ login
 
   get "/logout" logout

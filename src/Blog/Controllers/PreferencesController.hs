@@ -40,7 +40,7 @@ preferencesController = do
   post "/password" $ do
     params <- fst <$> parseForm
     verifyCSRF params
-    case validatePassword params of
+    case validateNewPassword params of
       Left errs -> render "dashboard/preferences.html" $
         object [ "blog" .= blog, "csrf_token" .= fmap decodeUtf8 csrf
                , "password_errors" .= errs ]
@@ -48,9 +48,9 @@ preferencesController = do
         withConnection $ \conn -> liftIO $ blogChangePassword conn blog passwd
         redirectBack
 
-validatePassword :: [(ByteString, ByteString)]
+validateNewPassword :: [(ByteString, ByteString)]
                  -> Either ValidationError ByteString
-validatePassword params =
+validateNewPassword params =
   let errs = validatePassword' params
   in if H.null $ validationErrors errs then
     Right $ fromJust $ lookup "new_password" params

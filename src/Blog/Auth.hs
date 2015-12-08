@@ -17,7 +17,7 @@ import Web.Simple.Session
 import Web.Simple.Templates
 
 import Blog.Common
-import Blog.Models.Blog (blogId, blogLogin)
+import Blog.Models.Blog (blogId, blogLogin, tryRegisterBlog)
 
 logout :: HasSession s => Controller s ()
 logout = do
@@ -46,6 +46,24 @@ register = do
     render "main/index.html" $
       object ["invite_code" .= (inviteCode :: Maybe T.Text) ]
 
+  post "/" $ do
+    params <- fst <$> parseForm
+    let username = decodeUtf8 <$> fromMaybe "" $ lookup "username" params
+        password = decodeUtf8 <$> fromMaybe "" $ lookup "password" params
+        verifyPassword = decodeUtf8 <$>
+          fromMaybe "" $ lookup "verify_password" params
+        inviteCode = decodeUtf8 <$> fromMaybe "" $ lookup "invite_code" params
+    eres <- withConnection $ \conn -> liftIO $
+      tryRegisterBlog conn username password verifyPassword inviteCode
+    case eres of
+      Right blog -> do
+        sessionInsert "blogger_id" $ S8.pack $ show $ blogId blog
+        respond $ redirectTo "/dashboard"
+      Left errs -> do
+        render "main/index.html" $ object
+          [ "invite_code" .= inviteCode
+          , "username" .= username
+          , "errors" .= errs ]
 
 login :: Controller AppSettings ()
 login = do
