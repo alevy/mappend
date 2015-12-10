@@ -1,5 +1,14 @@
+@import url(https://fonts.googleapis.com/css?family=Crimson+Text|Ubuntu);
+
 html {
   height: 100%;
+}
+
+body {
+  font-family: "Crimson Text", serif;
+}
+h1, h2, h3, h4, input, label, .footnote, #errors{
+  font-family: "Ubuntu", sans-serif;
 }
 
 body {

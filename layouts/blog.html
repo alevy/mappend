@@ -46,16 +46,10 @@ $endif$
       }
       h1, h2, h3, h4, input, label, .footnote, #errors{
         font-family: $for(font in blog.theme.fonts.header)$"$font.name$"$endfor$;
-      }$else$
-      @import url(https://fonts.googleapis.com/css?family=Crimson+Text|Ubuntu);
-      body {
-        font-family: "Crimson Text", serif;
-      }
-      h1, h2, h3, h4, input, label, .footnote, #errors{
-        font-family: "Ubuntu", sans-serif;
       }$endif$$if(blog.theme.colors)$
       body {
         background-color: $blog.theme.colors.primary$;
+        color: $blog.theme.colors.text$;
       }
       a {
         color: $blog.theme.colors.accent$;

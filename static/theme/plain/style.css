@@ -1,0 +1,284 @@
+* {
+  padding: 0;
+  margin: 0;
+  margin-bottom: 1em;
+}
+
+ul, ol {
+  margin-left: 2em;
+  padding-left: 40px;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  font-family: Georgia, Cambria, "Times New Roman", Times, serif;
+  font-size: 14pt;
+  color: rgba(0, 0, 0, 0.7);
+  margin: 0;
+}
+
+h1, h2, h3 {
+  font-family: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+#wrapper > header {
+  text-align: center;
+}
+
+#wrapper > header nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+#wrapper > header nav li {
+  display: inline-block;
+}
+
+#wrapper > header nav li:before {
+  content: "| ";
+}
+
+#wrapper > header nav li:first-child:before {
+  content: "";
+}
+
+#wrapper {
+  width: 80%;
+  margin: 0 auto;
+}
+
+#wrapper h2 {
+  margin-bottom: 20pt;
+}
+
+.posts li, .drafts li {
+  list-style: none;
+}
+
+.drafts, .posts {
+  display: inline-block;
+  vertical-align: top;
+  margin: 20pt;
+}
+
+form.widget {
+  display: inline;
+}
+
+button.fa {
+  background: none;
+  border: none;
+  margin: 0;
+  padding: 0;
+  color: inherit; 
+  cursor: pointer;
+}
+
+input {
+  font-size: 13pt;
+  border: 1px solid #ccc;
+}
+
+input, textarea {
+  margin-bottom: 10pt;
+  font-family: inherit;
+}
+
+textarea {
+  font-family: inherit; 
+  height: 10em;
+  font-size: 13pt;
+  border: 1px solid #ccc;
+  resize: vertical;
+}
+
+input[type="text"], input[type="email"], input[type="password"], textarea {
+  line-height: 1.5em;
+  background-color: white;
+  padding: 1%;
+  width: 98%;
+}
+
+input[name="username"], input[name="invite_code"] {
+  display: inline;
+  width: inherit;
+}
+
+input[type="submit"], input[type="button"] {
+  padding: 5px 10px;
+  background-color: #eee;
+}
+
+input[type="submit"]:active {
+  box-shadow: inset 0px 1px 1px #ccc;
+}
+
+.bubble {
+  border: 3px solid #ccc;
+  border-radius: 3px;
+  background-color: white;
+}
+
+.bubble:-webkit-full-screen {
+  width: 100%;
+  height: 100%;
+}
+
+.bubble:-moz-full-screen .write-content,
+.bubble:-moz-full-screen .preview-content {
+  height: 90%;
+  overflow-y: auto;
+}
+
+.bubble:-webkit-full-screen .write-content,
+.bubble:-webkit-full-screen .preview-content {
+  height: 90%;
+  overflow-y: auto;
+}
+
+.bubble:-moz-full-screen textarea#body {
+  height: 90%;
+}
+
+.bubble:-webkit-full-screen textarea#body {
+  height: 90%;
+}
+
+.bubble .tabs {
+  border-bottom: 2px solid #eee;
+  padding-top: 10px;
+  padding-left: 10px;
+}
+
+.bubble a.tab {
+  display: inline-block;
+  text-decoration: none;
+  color: inherit;
+  padding: 10px;
+  margin-bottom: -2px;
+}
+
+.bubble a.tab.active {
+  border: 2px solid #eee;
+  border-bottom: 0px;
+  border-radius: 5px 5px 0 0;
+  background-color: white;
+}
+
+.bubble a.zen {
+  float: right;
+  color: inherit;
+  text-decoration: none;
+  display: block;
+  margin-right: 15px;
+}
+
+.bubble a.zen.active {
+  display:none;
+}
+
+.bubble .preview-content {
+  display: none;
+}
+
+.bubble .write-content, .bubble .preview-content {
+  padding: 10px;
+}
+
+textarea#body {
+  height: 40em;
+  background-color: #eee;
+  border: 0px;
+  border-radius: 5px;
+  box-shadow: inset 0.5px 0.5px 1px 0.5px #ccc;
+}
+
+textarea#summary {
+  height: 4.5em;
+  resize: none;
+}
+
+input#title {
+  font-weight: 700;
+  font-size: 20px;
+}
+
+#errors {
+  border: 2px solid #e00;
+  border-radius: 3px;
+  background-color: #f7f7f7;
+  display: inline-block;
+}
+
+#errors h1 {
+  margin: 0px;
+  padding: 3px 15px;
+  font-size: 13pt;
+  color: white;
+  background-color: #e00;
+}
+
+#errors ul {
+  list-style: square;
+  margin: 1em;
+  margin-left: 1.5em;
+}
+
+.error {
+  border: 2px solid;
+  border-color: red !important;
+  padding: 3px;
+}
+
+#errors, .error {
+  margin-bottom: 1em;
+}
+
+#login {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #eee;
+}
+
+.login_form {
+  width: 400px;
+  margin: 90px auto;
+  border: 10px solid #ddd;
+  padding: 20px;
+  background-color: #fff;
+}
+
+.login_form form {
+  width: 100%;
+}
+
+.login_form input {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.login_form input[type="text"], .login_form input[type="password"] {
+  width: 85%;
+  line-height: 1.5em;
+  font-size: 16pt;
+}
+
+.login_form input[name="openid_identifier"] {
+  background: url(/images/openid-16x16.gif) no-repeat scroll 5px center;
+  padding-left: 25px;
+  line-height: 1em;
+  font-size: 14pt;
+}
+
