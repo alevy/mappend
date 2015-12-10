@@ -37,7 +37,8 @@ CREATE TABLE blog (
     id integer NOT NULL,
     username character varying(255) NOT NULL,
     title character varying(255) NOT NULL,
-    password_digest text DEFAULT crypt(md5((random())::text), gen_salt('bf'::text)) NOT NULL
+    password_digest text DEFAULT crypt(md5((random())::text), gen_salt('bf'::text)) NOT NULL,
+    theme jsonb
 );
 
 

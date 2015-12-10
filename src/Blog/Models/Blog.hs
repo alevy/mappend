@@ -1,11 +1,13 @@
 {-# LANGUAGE DeriveGeneric, OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
 module Blog.Models.Blog where
 
 import Control.Exception (throwIO)
 import Control.Monad (when)
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Trans.Except (ExceptT(..), runExceptT, throwE)
-import Data.Aeson (ToJSON(..), object, (.=))
+import Data.Aeson
+  (ToJSON(..), object, (.=), FromJSON(..), (.:), withObject, Value)
 import Data.ByteString (ByteString)
 import Data.ByteString.Builder (byteString)
 import qualified Data.ByteString.Char8 as S8
@@ -26,6 +28,30 @@ import Text.Regex.TDFA.Text ()
 
 import GHC.Generics
 
+data Font = Font { fontName :: Text , fontBuiltin :: Bool }
+  deriving (Show, Generic)
+
+instance ToJSON Font where
+  toJSON Font{..} = object [ "name" .= fontName, "builtin" .= fontBuiltin ]
+
+instance FromJSON Font where
+  parseJSON = withObject "Font" $ \v -> do
+    name <- v .: "name"
+    builtin <- v .: "builtin"
+    return Font { fontName = name, fontBuiltin = builtin }
+
+data FontInfo = FontInfo { fiHeader :: [Font], fiBody :: [Font] }
+  deriving (Show, Generic)
+
+instance ToJSON FontInfo where
+  toJSON FontInfo{..} = object [ "header" .= fiHeader, "body" .= fiBody ]
+
+instance FromJSON FontInfo where
+  parseJSON = withObject "FontInfo" $ \v -> do
+    header <- v .: "header"
+    body <- v .: "body"
+    return FontInfo { fiHeader = header, fiBody = body }
+
 data Password = Digest S8.ByteString | Plaintext Text deriving (Generic)
 
 instance Show Password where
@@ -45,7 +71,8 @@ instance FromField Password where
 data Blog = Blog { blogId :: DBKey
                  , blogUsername :: Text
                  , blogPasswordDigest :: Password
-                 , blogTitle :: Text } deriving (Show, Generic)
+                 , blogTitle :: Text
+                 , blogTheme :: Maybe Value } deriving (Show, Generic)
 
 validatePassword :: Blog -> ValidationError
 validatePassword Blog{blogPasswordDigest = Plaintext pwd} | pwd == mempty =
@@ -73,8 +100,8 @@ instance Model Blog where
       "title" "Title cannot be empty"
 
 instance ToJSON Blog where
-    toJSON blog =
-      object ["title" .= blogTitle blog, "username" .= blogUsername blog]
+    toJSON Blog{..} = object
+      ["title" .= blogTitle, "username" .= blogUsername, "theme" .= blogTheme]
 
 findByUsername :: Connection -> Text -> IO (Maybe Blog)
 findByUsername conn username = fmap listToMaybe $
@@ -114,7 +141,8 @@ tryRegisterBlog conn username password verifyPassword inviteCode =
         Blog { blogId = NullKey
              , blogUsername = username
              , blogPasswordDigest = Plaintext password
-             , blogTitle = "My Blog" }
+             , blogTitle = "My Blog"
+             , blogTheme = Nothing }
   where catchSqlErr fn = catchViolation catcher fn
         catcher _ (UniqueViolation "blog_username_key") = return $ Left $
           validationError "username" "Username already exists"
