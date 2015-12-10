@@ -7,7 +7,7 @@ import Control.Monad (when)
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Trans.Except (ExceptT(..), runExceptT, throwE)
 import Data.Aeson
-  (ToJSON(..), object, (.=), FromJSON(..), (.:), withObject, Value)
+  (ToJSON(..), object, (.=), FromJSON(..), (.:?), (.:), withObject, Value)
 import Data.ByteString (ByteString)
 import Data.ByteString.Builder (byteString)
 import qualified Data.ByteString.Char8 as S8
@@ -22,7 +22,7 @@ import Database.PostgreSQL.Simple (Connection, execute, query)
 import Database.PostgreSQL.Simple.Errors
   (catchViolation,  ConstraintViolation(..))
 import Database.PostgreSQL.Simple.ToField (ToField(..), Action(..))
-import Database.PostgreSQL.Simple.FromField (FromField(..))
+import Database.PostgreSQL.Simple.FromField (FromField(..), fromJSONField)
 import Text.Regex.TDFA ((=~))
 import Text.Regex.TDFA.Text ()
 
@@ -51,6 +51,40 @@ instance FromJSON FontInfo where
     header <- v .: "header"
     body <- v .: "body"
     return FontInfo { fiHeader = header, fiBody = body }
+
+data ColorInfo = ColorInfo { ciPrimary :: Text, ciAccent :: Text }
+  deriving (Show, Generic)
+
+instance ToJSON ColorInfo where
+  toJSON ColorInfo{..} = object [ "primary" .= ciPrimary, "accent" .= ciAccent ]
+
+instance FromJSON ColorInfo where
+  parseJSON = withObject "ColorInfo" $ \v -> do
+    primary <- v .: "primary"
+    accent <- v .: "accent"
+    return ColorInfo { ciPrimary = primary, ciAccent = accent }
+
+data ThemeInfo = ThemeInfo
+  { tiName :: Maybe Text
+  , tiFonts :: Maybe FontInfo
+  , tiColors :: Maybe ColorInfo } deriving (Show, Generic)
+
+instance ToJSON ThemeInfo where
+  toJSON ThemeInfo{..} = object
+    [ "name" .= tiName , "fonts" .= tiFonts, "colors" .= tiColors ]
+
+instance FromJSON ThemeInfo where
+  parseJSON = withObject "ThemeInfo" $ \v -> do
+    name <- v .:? "name"
+    fonts <- v .:? "fonts"
+    colors <- v .:? "colors"
+    return $ ThemeInfo { tiName = name, tiFonts = fonts, tiColors = colors }
+
+instance ToField ThemeInfo where
+  toField = toField . toJSON
+
+instance FromField ThemeInfo where
+  fromField = fromJSONField
 
 data Password = Digest S8.ByteString | Plaintext Text deriving (Generic)
 
