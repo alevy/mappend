@@ -1,0 +1,288 @@
+html {
+  height: 100%;
+}
+
+body {
+  background-color: #3f51b5;
+  font-size: 16pt;
+  color: #444;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+a {
+  color: #ff4081;
+  text-decoration: none;
+}
+
+#wrapper {
+  background-color: white;
+  padding: 20px;
+  margin: 0px auto;
+}
+
+#wrapper > header, #wrapper > section {
+  margin: 0px;
+  padding-top: 5px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+#wrapper > section {
+  min-height: 80%;
+  padding-bottom: 10px;
+}
+
+#wrapper > header {
+  text-align: center;
+}
+
+/**
+ * Nav bar links
+ */
+
+#wrapper > header nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+#wrapper > header nav li {
+  display: inline-block;
+}
+
+#wrapper > header nav li:before {
+  content: "| ";
+}
+
+#wrapper > header nav li:first-child:before {
+  content: "";
+}
+
+@media screen and (min-device-width: 767px) and (min-width: 767px) {
+
+  body {
+    max-width: 50em;
+    margin: 0 auto;
+    font-size: 13pt;
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: center center;
+  }
+
+  #wrapper {
+    background-color: white;
+    margin: 40px auto;
+    max-width: 600px;
+    border-radius: 3px;
+    box-shadow: 0px 0px 5px 5px rgba(0, 0, 0, 0.15);
+    padding: 70px;
+  }
+
+}
+
+header > h1 {
+  text-align: center;
+  text-transform: lowercase;
+}
+
+h1 a {
+  color: inherit;
+  text-decoration: none;
+}
+
+h2 a {
+  text-decoration: none;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+article {
+  padding-top: 15px;
+}
+
+article .content p {
+  text-align: justify;
+}
+
+section footer {
+  font-size: 70%;
+  text-align: center;
+  padding-top: 10px;
+}
+
+#errors {
+  border: 2px solid #e00;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+#errors h1 {
+  margin: 0px;
+  padding: 3px 15px;
+  font-size: inherit;
+  color: white;
+  background-color: #e00;
+}
+
+#errors ul {
+  list-style: square;
+}
+
+.error {
+  border: 2px solid;
+  border-color: red !important;
+  padding: 3px;
+}
+
+.post blockquote {
+  margin-right: 0;
+  padding: 5px;
+  border-left: 3px solid #ccc;
+}
+
+.post time {
+  font-size: 85%;
+  font-style: italic;
+}
+
+.reference {
+  font-size: 75%;
+  color: inherit;
+  text-decoration: none;
+  vertical-align: super;
+}
+
+.footnote {
+  display: none;
+  position: absolute;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 15px;
+  border: 3px solid #ccc;
+  border-radius: 5px;
+  max-width: 20em;
+}
+
+hr {
+  border: 0px;
+  border-top: 1px solid #666;
+  width: 60%;
+}
+
+/**
+ * Solarized code highlighting
+ */
+
+pre {
+  padding: 15px;
+  background-color: #fdf6e3;
+  border-radius: 5px;
+  box-shadow: 1px 1px 5px #ccc;
+  overflow: auto;
+}
+
+code {
+  font-family: Ubuntu Mono, monospace;
+}
+
+.sourceCode .kw { color: #268BD2; }
+.sourceCode .dt { color: #268BD2; }
+.sourceCode .dv, .sourceCode .bn, .sourceCode .fl { color: #D33682; }
+.sourceCode .ch { color: #DC322F; }
+.sourceCode .st { color: #2AA198; }
+.sourceCode .co { color: #93A1A1; }
+.sourceCode .ot { color: #A57800; }
+.sourceCode .al { color: #CB4B16; font-weight: bold; }
+.sourceCode .fu { color: #268BD2; }
+.sourceCode .re { }
+.sourceCode .er { color: #D30102; font-weight: bold; }
+
+/**
+ * Comment styling
+ */
+
+.comments {
+  border-top: 1px solid #ccc;
+}
+
+ol#comments {
+  padding: 0;
+}
+
+ol#comments > li {
+  list-style: none;
+  margin-bottom: 1em;
+}
+
+.comment {
+  border: 1px solid #ccc;#ccc;
+  position: relative;
+  margin-left: 4em;
+}
+
+.comment:before {
+  content: "";
+  border-width: 12px 12px 12px 0px;
+  border-style: solid;
+  border-color: rgba(0, 0, 0, 0) #ccc;
+  position: absolute;
+  left: -12px;
+  top: 4px;
+}
+
+.comment-author {
+  background-color: #ccc;
+  padding: 0.5em;
+}
+
+.comment-author img {
+  display: inline-block;
+  position: absolute;
+  left: -4em;
+  top: 0px;
+}
+
+.comment-author time {
+  display: inline-block;
+  float: right;
+}
+
+.comment > p {
+  padding-left: 0.5em;
+}
+
+/* Comments > new comment form elements */
+
+input {
+  font-size: inherit;
+  border: 1px solid #ccc;
+}
+
+textarea {
+  font-family: inherit;
+  height: 10em;
+  font-size: inherit;
+  border: 1px solid #ccc;
+  resize: vertical;
+}
+
+input[type="text"], input[type="email"], textarea {
+  line-height: 1.5em;
+  background-color: white;
+  padding: 1%;
+  width: 98%;
+}
+
+input[type="submit"], input[type="button"] {
+  padding: 5px 10px;
+  background-color: #eee;
+}
+
+input[type="submit"]:active {
+  box-shadow: inset 0px 1px 1px #ccc;
+}
+

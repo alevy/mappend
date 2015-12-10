@@ -4,7 +4,11 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" type="text/css" href="/css/font-awesome.min.css">
-    <link rel="stylesheet" type="text/css" href="/css/blog.css">
+$if(blog.theme.name)$
+    <link rel="stylesheet" type="text/css" href="/theme/$blog.theme.name$/style.css">
+$else$
+    <link rel="stylesheet" type="text/css" href="/theme/default/style.css">
+$endif$
     <link rel="apple-touch-icon-precomposed" sizes="57x57" href="/icons/apple-touch-icon-57x57.png" />
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/icons/apple-touch-icon-114x114.png" />
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/icons/apple-touch-icon-72x72.png" />
@@ -35,6 +39,29 @@
     $else$
     <title>$blog.title$</title>
     $endif$
+    <style>$if(blog.theme.fonts)$
+      @import url("$fontsUrl(blog.theme.fonts)$");
+      body {
+        font-family: $for(font in blog.theme.fonts.body)$"$font.name$"$endfor$;
+      }
+      h1, h2, h3, h4, input, label, .footnote, #errors{
+        font-family: $for(font in blog.theme.fonts.header)$"$font.name$"$endfor$;
+      }$else$
+      @import url(https://fonts.googleapis.com/css?family=Crimson+Text|Ubuntu);
+      body {
+        font-family: "Crimson Text", serif;
+      }
+      h1, h2, h3, h4, input, label, .footnote, #errors{
+        font-family: "Ubuntu", sans-serif;
+      }$endif$$if(blog.theme.colors)$
+      body {
+        background-color: $blog.theme.colors.primary$;
+      }
+      a {
+        color: $blog.theme.colors.accent$;
+      }$endif$$if(blog.theme.background_image)$
+      body { background-image: url($blog.theme.background_image$) }$endif$
+    </style>
 </head>
 <body>
   <div id="wrapper">
