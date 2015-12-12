@@ -21,8 +21,8 @@ mainController = do
     dashboard $ requiresAdmin "/login" $ do
       get "/" $ respond $ redirectTo "/dashboard/posts/new"
       routeName "posts" $ do
-        postsAdminController
         routePattern ":post_id/comments" $ commentsAdminController
+        postsAdminController
       routeName "preferences" $ preferencesController
 
     redirectLogin "/login"
