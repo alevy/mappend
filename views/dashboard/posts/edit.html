@@ -15,11 +15,23 @@ $endif$
 <form class="content" action="/dashboard/posts/$post.postId$"
   method="post" acceptCharset="UTF-8">
   <input type="hidden" name="_method" value="PUT"/>
-  <input type="hidden" name="csrf_token" value="$csrf_token$">
+  <input type="hidden" name="csrf_token" value="$csrf_token$"/>
   <p$if errors.title$ class="error"$endif$>
     <input type="text" name="title" id="title" placeholder="title"
     value="$post.postTitle$"/></p>
   <p>Slug: <strong>$post.postSlug$</strong></p>
+  <p>
+    $for tag in post.postTags$<input type="hidden" name="tags[]" value="$tag$"/>
+$endfor$
+    <div class="input">
+      <span id="tag-spans"></span>
+      <span class="placeholder">
+        tags (e.g. recipe, announcement, thoughts). press 'enter' to add a tag
+      </span>
+      <div contentEditable="true" id="tags" style="height: 1.5em">
+      </div>
+    </div>
+  </p> 
   <div class="bubble">
     <div class="tabs">
       <a href="#write" class="tab active">Write</a>
@@ -33,11 +45,10 @@ $endif$
     </div>
   </div>
   <br/>
-  $if post.postPostedAt$
-  <input type="submit" value="Save"/>
-  <input type="submit" name="unpublish" value="Unpublish">
-  $else$
-  <input type="submit" value="Save Draft"/>
-  <input type="submit" name="publish" value="Publish"/>
-  $endif$
+  <p>$if post.postPostedAt$
+    <input type="submit" value="Save"/>
+    <input type="submit" name="unpublish" value="Unpublish">$else$
+    <input type="submit" value="Save Draft"/>
+    <input type="submit" name="publish" value="Publish"/>$endif$
+  </p>
 </form>

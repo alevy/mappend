@@ -14,6 +14,18 @@ $endif$
   <p$if errors.title$ class="error"$endif$>
     <input type="text" name="title" id="title" placeholder="title"
     value="$post.postTitle$"/></p>
+  <p>
+  $for tag in post.postTags$<input type="hidden" name="tags[]" value="$tag$"/>
+$endfor$
+    <div class="input">
+      <span id="tag-spans"></span>
+      <span class="placeholder">
+        tags (e.g. recipe, announcement, thoughts). press 'enter' to add a tag
+      </span>
+      <div contentEditable="true" id="tags" style="height: 1.5em">
+      </div>
+    </div>
+  </p> 
   <div class="bubble$if errors.body$ error$endif$">
     <div class="tabs">
       <a href="#write" class="tab active">Write</a>
@@ -27,7 +39,9 @@ $endif$
     </div>
   </div>
   <br/>
-  <input type="submit" value="Save Draft"/>
-  <input type="submit" name="publish" value="Publish"/>
+  <p>
+    <input type="submit" value="Save Draft"/>
+    <input type="submit" name="publish" value="Publish"/>
+  </p>
 </form>
 
