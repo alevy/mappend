@@ -11,6 +11,7 @@ import Data.Monoid
 import Data.Text (Text)
 import qualified Data.Text as T
 import Data.Time.LocalTime
+import Data.Vector (Vector)
 import Database.PostgreSQL.ORM
 import Database.PostgreSQL.Simple (Connection)
 import Text.Regex.TDFA
@@ -25,6 +26,7 @@ data Post = Post { postId :: DBKey
                  , postSummary :: Text
                  , postBody :: Text
                  , postBodyHtml :: Text
+                 , postTags :: Vector Text
                  , postPostedAt :: Maybe ZonedTime} deriving (Show, Generic)
 
 getPosts :: Blog -> DBSelect Post

@@ -13,6 +13,7 @@ import Data.Maybe
 import qualified Data.Text as T
 import Data.Text.Encoding
 import Data.Time.LocalTime (getZonedTime)
+import qualified Data.Vector as V
 import Database.PostgreSQL.ORM
 import Web.Simple
 import Web.Simple.Session
@@ -116,6 +117,8 @@ postsAdminController = do
                         (pure $ postTitle p)
             pBody <- (decodeUtf8 <$> lookup "body" params) <|>
                       (pure $ postBody p)
+            let tags = V.fromList $ map decodeUtf8 $
+                  map snd $ filter ((== "tags[]") . fst) params
             let postedAt = (lookup "publish" params >> pure curTime) <|>
                               postPostedAt p
             let bodyHtml = markdown pBody
@@ -123,6 +126,7 @@ postsAdminController = do
                           , postBody = pBody
                           , postSummary = summarizePost 140 bodyHtml
                           , postBodyHtml = bodyHtml
+                          , postTags = tags
                           , postPostedAt = postedAt }
       case mpost of
         Just post0 -> do
@@ -150,6 +154,8 @@ postsAdminController = do
             pSlug <- (((not . T.null) `mfilter`
                         (decodeUtf8 <$> lookup "slug" params))
                       <|> (Just $ slugFromTitle pTitle))
+            let tags = V.fromList $ map decodeUtf8 $
+                  map snd $ filter ((== "tags[]") . fst) params
             let postedAt = lookup "publish" params >> pure curTime
             let bodyHtml = markdown pBody
             return $ Post { postId = NullKey
@@ -159,6 +165,7 @@ postsAdminController = do
                           , postSlug = pSlug
                           , postBody = pBody
                           , postBodyHtml = bodyHtml
+                          , postTags = tags
                           , postPostedAt = postedAt }
       case mpost of
         Just post0 -> do

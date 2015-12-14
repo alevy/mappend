@@ -48,5 +48,6 @@ executable blog
     regex-tdfa,
     regex-tdfa-text,
     transformers,
-    unordered-containers
+    unordered-containers,
+    vector
 

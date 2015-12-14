@@ -116,7 +116,8 @@ CREATE TABLE post (
     slug character varying(32) NOT NULL,
     body_html text NOT NULL,
     summary text NOT NULL,
-    blog_id integer NOT NULL
+    blog_id integer NOT NULL,
+    tags text[] DEFAULT '{}'::text[] NOT NULL
 );
 
 
@@ -196,6 +197,10 @@ CREATE UNIQUE INDEX blog_username_idx ON blog USING btree (username);
 
 
 CREATE UNIQUE INDEX post_stub_idx ON post USING btree (slug);
+
+
+
+CREATE INDEX post_tags_idx ON post USING btree (blog_id, tags);
 
 
 
