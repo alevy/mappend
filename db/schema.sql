@@ -84,7 +84,8 @@ ALTER SEQUENCE comment_id_seq OWNED BY comment.id;
 CREATE TABLE hostname (
     id integer NOT NULL,
     hostname text NOT NULL,
-    blog_id integer
+    blog_id integer,
+    tags text[] DEFAULT '{}'::text[] NOT NULL
 );
 
 

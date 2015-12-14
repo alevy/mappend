@@ -3,6 +3,7 @@ module Blog.Models.Hostname where
 
 import Data.Text (Text)
 import Data.Maybe (listToMaybe)
+import Data.Vector (Vector)
 import Database.PostgreSQL.ORM
 import Database.PostgreSQL.Simple (Connection)
 
@@ -12,6 +13,7 @@ import Blog.Models.Blog
 
 data Hostname = Hostname { hostnameId :: DBKey
                          , hostnameHostname :: Text
+                         , hostnameTags :: Vector Text
                          , hostnameBlogId :: DBRef Blog }
                   deriving (Show, Generic)
 
