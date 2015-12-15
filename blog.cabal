@@ -42,7 +42,8 @@ executable blog
     wai-extra >= 2.0,
     text,
     time,
-    postgresql-simple,
+    postgresql-simple >= 0.5.1.2,
+    -- ^ proper treatment of empty arrays
     postgresql-orm >= 0.4.1,
     -- ^ validations
     regex-tdfa,
