@@ -35,7 +35,8 @@ fontsUrl :: FontInfo -> Value
 fontsUrl fi =
   let headerFonts = foldl processFont [] $ fiHeader fi
       fonts = foldl processFont headerFonts $ fiBody fi
-  in toJSON $ "//fonts.googleapis.com/css?family=" `T.append` T.intercalate "|" fonts
+  in toJSON $ T.append "https://fonts.googleapis.com/css?family="
+                       (T.intercalate "|" fonts)
   where processFont :: [Text] -> Font -> [Text]
         processFont accm font =
           if fontBuiltin font
