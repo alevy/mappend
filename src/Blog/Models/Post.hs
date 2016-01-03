@@ -43,7 +43,7 @@ validateSlug = validate (\post -> postSlug post =~ pattern)
     "slug"
     "Slug must contain only letters, numbers and dashes"
   where pattern :: Text
-        pattern = "^[a-z1-9-]{0,32}$"
+        pattern = "^[a-z0-9-]{0,32}$"
 
 instance Model Post where
   modelInfo = underscoreModelInfo "post"
